@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
-    Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis,
-    YAxis
+    Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -194,7 +193,6 @@ export function AdvancedCustomerSegmentation({
                                         );
                                     }}
                                 />
-                                <Legend />
                                 <Bar dataKey="totalRevenue" fill="#8884d8" name="Total Revenue">
                                     {chartData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
