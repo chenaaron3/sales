@@ -236,3 +236,47 @@ export interface PurchaseCycleSegment {
   averageRevenue: number;
   percentage: number;
 }
+
+export interface ProductTrend {
+  date: string;
+  [productName: string]: string | number;
+}
+
+export interface BrandCollectionPerformance {
+  name: string;
+  type: "brand" | "collection";
+  revenue: number;
+  quantity: number;
+  transactions: number;
+  averagePrice: number;
+  productCount: number;
+}
+
+export interface ProductStorePerformance {
+  productName: string;
+  productCode: string;
+  storeName: string;
+  storeCode: string;
+  revenue: number;
+  quantity: number;
+  transactions: number;
+}
+
+export interface PerformanceWithStoreBreakdown {
+  name: string;
+  totalRevenue: number;
+  stores: {
+    storeName: string;
+    revenue: number;
+  }[];
+}
+
+export interface CollectionTrend {
+  date: string;
+  [collectionName: string]: string | number;
+}
+
+export interface StoreTrend {
+  date: string;
+  [storeName: string]: string | number;
+}

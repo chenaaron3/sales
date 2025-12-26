@@ -12,6 +12,12 @@ import type {
   DayOfWeekData,
   CustomerDetail,
   RFMSegment,
+  ProductTrend,
+  BrandCollectionPerformance,
+  ProductStorePerformance,
+  PerformanceWithStoreBreakdown,
+  CollectionTrend,
+  StoreTrend,
 } from "../types";
 
 export function calculateKPIs(salesData: SalesRecord[]): KPIMetrics {
@@ -1137,4 +1143,478 @@ export function getAOVSegments(salesData: SalesRecord[]): CustomerSegment[] {
   });
 
   return segments;
+}
+
+// Product Trends Over Time
+export function getProductTrends(
+  salesData: SalesRecord[],
+  topN: number = 10,
+  granularity: Granularity = "monthly"
+): ProductTrend[] {
+  // First get top products
+  const topProducts = getTopProducts(salesData, topN);
+  const topProductNames = new Set(topProducts.map((p) => p.productName));
+
+  // Group by period and product
+  const trendMap = new Map<string, Map<string, number>>();
+
+  salesData.forEach((record) => {
+    const productName = record.productName || record.productCode;
+    if (!productName || !topProductNames.has(productName)) return;
+    if (record.transactionType !== "売上" || record.amount <= 0) return;
+
+    const dateStr = record.purchaseDate;
+    if (!dateStr) return;
+
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) return;
+
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const date = new Date(year, month, day);
+    const periodKey = getDateKey(date, granularity);
+
+    if (!trendMap.has(periodKey)) {
+      trendMap.set(periodKey, new Map());
+    }
+
+    const periodMap = trendMap.get(periodKey)!;
+    periodMap.set(
+      productName,
+      (periodMap.get(productName) || 0) + record.amount
+    );
+  });
+
+  // Convert to array format
+  const result: ProductTrend[] = [];
+  const sortedDates = Array.from(trendMap.keys()).sort();
+
+  sortedDates.forEach((date) => {
+    const periodMap = trendMap.get(date)!;
+    const entry: ProductTrend = { date };
+
+    topProductNames.forEach((productName) => {
+      entry[productName] = periodMap.get(productName) || 0;
+    });
+
+    result.push(entry);
+  });
+
+  return result;
+}
+
+// Brand/Collection Performance
+export function getBrandCollectionPerformance(
+  salesData: SalesRecord[],
+  type: "brand" | "collection"
+): BrandCollectionPerformance[] {
+  const performanceMap = new Map<
+    string,
+    {
+      revenue: number;
+      quantity: number;
+      transactions: Set<string>;
+      products: Set<string>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const key =
+      type === "brand"
+        ? sale.brand || "その他"
+        : sale.collectionName || "その他";
+
+    if (!performanceMap.has(key)) {
+      performanceMap.set(key, {
+        revenue: 0,
+        quantity: 0,
+        transactions: new Set(),
+        products: new Set(),
+      });
+    }
+
+    const perf = performanceMap.get(key)!;
+    perf.revenue += sale.amount;
+    perf.quantity += sale.quantity;
+    perf.transactions.add(sale.transactionNumber);
+    perf.products.add(sale.productName || sale.productCode);
+  });
+
+  const result: BrandCollectionPerformance[] = Array.from(
+    performanceMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      type,
+      revenue: data.revenue,
+      quantity: data.quantity,
+      transactions: data.transactions.size,
+      averagePrice: data.quantity > 0 ? data.revenue / data.quantity : 0,
+      productCount: data.products.size,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  return result;
+}
+
+// Product by Store Performance
+export function getProductStorePerformance(
+  salesData: SalesRecord[],
+  topNProducts: number = 20
+): ProductStorePerformance[] {
+  // First get top products
+  const topProducts = getTopProducts(salesData, topNProducts);
+  const topProductNames = new Set(topProducts.map((p) => p.productName));
+
+  const performanceMap = new Map<
+    string,
+    {
+      productName: string;
+      productCode: string;
+      storeName: string;
+      storeCode: string;
+      revenue: number;
+      quantity: number;
+      transactions: Set<string>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const productName = sale.productName || sale.productCode;
+    if (!productName || !topProductNames.has(productName)) return;
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const key = `${productName}|${sale.storeName.trim()}`;
+
+    if (!performanceMap.has(key)) {
+      performanceMap.set(key, {
+        productName,
+        productCode: sale.productCode,
+        storeName: sale.storeName.trim(),
+        storeCode: sale.storeCode,
+        revenue: 0,
+        quantity: 0,
+        transactions: new Set(),
+      });
+    }
+
+    const perf = performanceMap.get(key)!;
+    perf.revenue += sale.amount;
+    perf.quantity += sale.quantity;
+    perf.transactions.add(sale.transactionNumber);
+  });
+
+  const result: ProductStorePerformance[] = Array.from(performanceMap.values())
+    .map((data) => ({
+      productName: data.productName,
+      productCode: data.productCode,
+      storeName: data.storeName,
+      storeCode: data.storeCode,
+      revenue: data.revenue,
+      quantity: data.quantity,
+      transactions: data.transactions.size,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  return result;
+}
+
+// Product Performance with Store Breakdown
+export function getProductPerformanceWithStores(
+  salesData: SalesRecord[],
+  topN: number = 10
+): PerformanceWithStoreBreakdown[] {
+  // Get top products
+  const topProducts = getTopProducts(salesData, topN);
+  const topProductNames = new Set(topProducts.map((p) => p.productName));
+
+  // Map: productName -> Map: storeName -> revenue
+  const productStoreMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const productName = sale.productName || sale.productCode;
+    if (!productName || !topProductNames.has(productName)) return;
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const storeName = sale.storeName.trim();
+
+    if (!productStoreMap.has(productName)) {
+      productStoreMap.set(productName, {
+        totalRevenue: 0,
+        stores: new Map(),
+      });
+    }
+
+    const productData = productStoreMap.get(productName)!;
+    productData.totalRevenue += sale.amount;
+    productData.stores.set(
+      storeName,
+      (productData.stores.get(storeName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    productStoreMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([storeName, revenue]) => ({ storeName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  return result;
+}
+
+// Collection Performance with Store Breakdown
+export function getCollectionPerformanceWithStores(
+  salesData: SalesRecord[],
+  topN: number = 10
+): PerformanceWithStoreBreakdown[] {
+  // Get top collections
+  const topCollections = getBrandCollectionPerformance(salesData, "collection");
+  const topCollectionNames = new Set(
+    topCollections.slice(0, topN).map((c) => c.name)
+  );
+
+  // Map: collectionName -> Map: storeName -> revenue
+  const collectionStoreMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const collectionName = sale.collectionName || "その他";
+    if (!topCollectionNames.has(collectionName)) return;
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const storeName = sale.storeName.trim();
+
+    if (!collectionStoreMap.has(collectionName)) {
+      collectionStoreMap.set(collectionName, {
+        totalRevenue: 0,
+        stores: new Map(),
+      });
+    }
+
+    const collectionData = collectionStoreMap.get(collectionName)!;
+    collectionData.totalRevenue += sale.amount;
+    collectionData.stores.set(
+      storeName,
+      (collectionData.stores.get(storeName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    collectionStoreMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([storeName, revenue]) => ({ storeName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  return result;
+}
+
+// Collection Trends Over Time
+export function getCollectionTrends(
+  salesData: SalesRecord[],
+  topN: number = 10,
+  granularity: Granularity = "monthly"
+): CollectionTrend[] {
+  // Get top collections
+  const topCollections = getBrandCollectionPerformance(salesData, "collection");
+  const topCollectionNames = new Set(
+    topCollections.slice(0, topN).map((c) => c.name)
+  );
+
+  // Group by period and collection
+  const trendMap = new Map<string, Map<string, number>>();
+
+  salesData.forEach((record) => {
+    const collectionName = record.collectionName || "その他";
+    if (!topCollectionNames.has(collectionName)) return;
+    if (record.transactionType !== "売上" || record.amount <= 0) return;
+
+    const dateStr = record.purchaseDate;
+    if (!dateStr) return;
+
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) return;
+
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const date = new Date(year, month, day);
+    const periodKey = getDateKey(date, granularity);
+
+    if (!trendMap.has(periodKey)) {
+      trendMap.set(periodKey, new Map());
+    }
+
+    const periodMap = trendMap.get(periodKey)!;
+    periodMap.set(
+      collectionName,
+      (periodMap.get(collectionName) || 0) + record.amount
+    );
+  });
+
+  // Convert to array format
+  const result: CollectionTrend[] = [];
+  const sortedDates = Array.from(trendMap.keys()).sort();
+
+  sortedDates.forEach((date) => {
+    const periodMap = trendMap.get(date)!;
+    const entry: CollectionTrend = { date };
+
+    topCollectionNames.forEach((collectionName) => {
+      entry[collectionName] = periodMap.get(collectionName) || 0;
+    });
+
+    result.push(entry);
+  });
+
+  return result;
+}
+
+// Store Performance with Product Breakdown
+export function getStorePerformanceWithProducts(
+  salesData: SalesRecord[],
+  topN: number = 10
+): PerformanceWithStoreBreakdown[] {
+  // Get top stores
+  const topStores = getStorePerformance(salesData);
+  const topStoreNames = new Set(
+    topStores.slice(0, topN).map((s) => s.storeName)
+  );
+
+  // Get top products to limit breakdown
+  const topProducts = getTopProducts(salesData, 20);
+  const topProductNames = new Set(topProducts.map((p) => p.productName));
+
+  // Map: storeName -> Map: productName -> revenue
+  const storeProductMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>; // Reusing stores field but storing products
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const storeName = sale.storeName?.trim() || "";
+    if (!storeName || !topStoreNames.has(storeName)) return;
+
+    const productName = sale.productName || sale.productCode;
+    if (!productName || !topProductNames.has(productName)) return;
+
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    if (!storeProductMap.has(storeName)) {
+      storeProductMap.set(storeName, {
+        totalRevenue: 0,
+        stores: new Map(), // Using stores field to store products
+      });
+    }
+
+    const storeData = storeProductMap.get(storeName)!;
+    storeData.totalRevenue += sale.amount;
+    storeData.stores.set(
+      productName,
+      (storeData.stores.get(productName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    storeProductMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([productName, revenue]) => ({ storeName: productName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  return result;
+}
+
+// Store Trends Over Time
+export function getStoreTrends(
+  salesData: SalesRecord[],
+  topN: number = 10,
+  granularity: Granularity = "monthly"
+): StoreTrend[] {
+  // Get top stores
+  const topStores = getStorePerformance(salesData);
+  const topStoreNames = new Set(
+    topStores.slice(0, topN).map((s) => s.storeName)
+  );
+
+  // Group by period and store
+  const trendMap = new Map<string, Map<string, number>>();
+
+  salesData.forEach((record) => {
+    const storeName = record.storeName?.trim() || "";
+    if (!storeName || !topStoreNames.has(storeName)) return;
+    if (record.transactionType !== "売上" || record.amount <= 0) return;
+
+    const dateStr = record.purchaseDate;
+    if (!dateStr) return;
+
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) return;
+
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const date = new Date(year, month, day);
+    const periodKey = getDateKey(date, granularity);
+
+    if (!trendMap.has(periodKey)) {
+      trendMap.set(periodKey, new Map());
+    }
+
+    const periodMap = trendMap.get(periodKey)!;
+    periodMap.set(storeName, (periodMap.get(storeName) || 0) + record.amount);
+  });
+
+  // Convert to array format
+  const result: StoreTrend[] = [];
+  const sortedDates = Array.from(trendMap.keys()).sort();
+
+  sortedDates.forEach((date) => {
+    const periodMap = trendMap.get(date)!;
+    const entry: StoreTrend = { date };
+
+    topStoreNames.forEach((storeName) => {
+      entry[storeName] = periodMap.get(storeName) || 0;
+    });
+
+    result.push(entry);
+  });
+
+  return result;
 }
