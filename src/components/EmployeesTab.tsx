@@ -9,11 +9,13 @@ interface EmployeesTabProps {
     employeePerformance: EmployeePerformance[];
 }
 
-const ITEMS_PER_PAGE = 10;
+const DEFAULT_ITEMS_PER_PAGE = 25;
+const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
     const [selectedStore, setSelectedStore] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState<number>(DEFAULT_ITEMS_PER_PAGE);
 
     // Ensure employeePerformance is an array
     const safeData = Array.isArray(employeePerformance) ? employeePerformance : [];
@@ -40,17 +42,23 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
     }, [safeData, selectedStore]);
 
     // Paginate
-    const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
         return filteredData.slice(startIndex, endIndex);
-    }, [filteredData, currentPage]);
+    }, [filteredData, currentPage, itemsPerPage]);
 
-    // Reset to page 1 when filter changes
+    // Reset to page 1 when filter or items per page changes
     const handleStoreChange = (store: string) => {
         setSelectedStore(store);
         setCurrentPage(1);
+    };
+
+    const handleItemsPerPageChange = (value: string) => {
+        const newItemsPerPage = parseInt(value, 10);
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when changing items per page
     };
 
     return (
@@ -64,20 +72,36 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                                 All employees ranked by total sales revenue, with product breakdown
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <label className="text-sm text-gray-700 dark:text-gray-300">Store:</label>
-                            <select
-                                value={selectedStore}
-                                onChange={(e) => handleStoreChange(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                                <option value="all">All Stores</option>
-                                {allStores.map((store) => (
-                                    <option key={store} value={store}>
-                                        {store}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <label className="text-sm text-gray-700 dark:text-gray-300">Store:</label>
+                                <select
+                                    value={selectedStore}
+                                    onChange={(e) => handleStoreChange(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="all">All Stores</option>
+                                    {allStores.map((store) => (
+                                        <option key={store} value={store}>
+                                            {store}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <label className="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
@@ -88,7 +112,7 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                     {totalPages > 1 && (
                         <div className="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredData.length)} of {filteredData.length} employees
+                                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} employees
                             </div>
                             <div className="flex items-center gap-2">
                                 <button

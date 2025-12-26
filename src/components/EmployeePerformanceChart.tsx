@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
+import { BreakdownPanel } from './BreakdownPanel';
+
 import type { EmployeePerformance } from '../types';
 
 interface EmployeePerformanceChartProps {
@@ -155,60 +157,18 @@ export function EmployeePerformanceChart({ data }: EmployeePerformanceChartProps
                     </BarChart>
                 </ResponsiveContainer>
             </div>
-            <div className="w-80 flex-shrink-0">
-                <div className="sticky top-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm min-h-[200px]">
-                    {hoveredItem ? (
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                {hoveredItem.staffName}
-                            </h3>
-                            <div className="space-y-2">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    <span className="font-medium">Total Revenue:</span>{' '}
-                                    <span className="text-gray-900 dark:text-white font-semibold">
-                                        ¥{hoveredItem.totalRevenue.toLocaleString('ja-JP')}
-                                    </span>
-                                </div>
-                                <div className="mt-4">
-                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Products:
-                                    </p>
-                                    <div className="space-y-1 max-h-[400px] overflow-y-auto">
-                                        {[...hoveredItem.products]
-                                            .sort((a, b) => b.revenue - a.revenue)
-                                            .map((product, index) => (
-                                                <div
-                                                    key={product.productName}
-                                                    className="flex items-center gap-2 text-sm"
-                                                >
-                                                    <div
-                                                        className="w-3 h-3 rounded-sm flex-shrink-0"
-                                                        style={{
-                                                            backgroundColor:
-                                                                PRODUCT_COLORS[index % PRODUCT_COLORS.length],
-                                                        }}
-                                                    />
-                                                    <span className="text-gray-700 dark:text-gray-300 flex-1 truncate">
-                                                        {product.productName}
-                                                    </span>
-                                                    <span className="text-gray-900 dark:text-white font-semibold flex-shrink-0">
-                                                        ¥{product.revenue.toLocaleString('ja-JP')}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                                Hover over a bar to see product breakdown
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </div>
+            <BreakdownPanel
+                title={hoveredItem?.staffName || ''}
+                totalRevenue={hoveredItem?.totalRevenue || 0}
+                items={hoveredItem?.products.map((p) => ({ name: p.productName, revenue: p.revenue })) || []}
+                itemColors={PRODUCT_COLORS}
+                itemList={productList}
+                emptyMessage={{
+                    primary: 'Hover over a bar',
+                    secondary: 'to see product breakdown',
+                }}
+                itemLabel="Products:"
+            />
         </div>
     );
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
+import { BreakdownPanel } from './BreakdownPanel';
+
 import type { PerformanceWithStoreBreakdown } from '../types';
 
 interface ProductPerformanceProps {
@@ -117,61 +119,18 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
                     </BarChart>
                 </ResponsiveContainer>
             </div>
-            <div className="w-80 shrink-0">
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 sticky top-4">
-                    {hoveredItem ? (
-                        <>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                {hoveredItem.name}
-                            </h3>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                Total Revenue: <span className="font-bold text-gray-900 dark:text-white">
-                                    ¥{hoveredItem.totalRevenue.toLocaleString('ja-JP')}
-                                </span>
-                            </div>
-                            <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                    Store Breakdown:
-                                </div>
-                                {[...hoveredItem.stores]
-                                    .sort((a, b) => b.revenue - a.revenue)
-                                    .map((store) => {
-                                        const percentage = (store.revenue / hoveredItem.totalRevenue) * 100;
-                                        const colorIndex = storeList.indexOf(store.storeName);
-                                        return (
-                                            <div
-                                                key={store.storeName}
-                                                className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                            >
-                                                <div
-                                                    className="w-4 h-4 rounded shrink-0"
-                                                    style={{
-                                                        backgroundColor: STORE_COLORS[colorIndex % STORE_COLORS.length],
-                                                    }}
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                        {store.storeName}
-                                                    </div>
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                                                        ¥{store.revenue.toLocaleString('ja-JP')} ({percentage.toFixed(1)}%)
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex items-center justify-center h-[500px] text-gray-400 dark:text-gray-500">
-                            <div className="text-center">
-                                <p className="text-sm">Hover over a {viewType === 'product' ? 'product' : 'collection'} bar</p>
-                                <p className="text-xs mt-1">to see store breakdown</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+            <BreakdownPanel
+                title={hoveredItem?.name || ''}
+                totalRevenue={hoveredItem?.totalRevenue || 0}
+                items={hoveredItem?.stores.map((s) => ({ name: s.storeName, revenue: s.revenue })) || []}
+                itemColors={STORE_COLORS}
+                itemList={storeList}
+                emptyMessage={{
+                    primary: `Hover over a ${viewType === 'product' ? 'product' : 'collection'} bar`,
+                    secondary: 'to see store breakdown',
+                }}
+                itemLabel="Store Breakdown:"
+            />
         </div>
     );
 }
