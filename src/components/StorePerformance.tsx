@@ -18,8 +18,8 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
 
     if (data.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">No data available</p>
+            <div className="flex items-center justify-center h-64">
+                <p className="text-muted-foreground">No data available</p>
             </div>
         );
     }
@@ -57,11 +57,7 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Top 25 Stores Performance by Product
-            </h2>
-            <div className="flex gap-6">
+        <div className="flex gap-6 -mx-6">
                 <div className="flex-1 overflow-visible">
                     <ResponsiveContainer width="100%" height={800}>
                         <BarChart
@@ -177,6 +173,5 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
                     </div>
                 </div>
             </div>
-        </div>
     );
 }

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { BirthdayHeatMap } from './BirthdayHeatMap';
 import { DayOfWeekAnalysisChart } from './DayOfWeekAnalysis';
 import { TrendChart } from './TrendChart';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 import type { BirthdaySalesData, DayOfWeekData, TimeSeriesData } from '../types';
 import type { BirthdayType, Granularity } from '../utils/dataAnalysis';
@@ -48,26 +50,36 @@ export function TemporalTab({
 
             <DayOfWeekAnalysisChart data={dayOfWeekData} metric="revenue" />
 
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Time Granularity
-                </label>
-                <div className="flex gap-2">
-                    {(['daily', 'weekly', 'monthly'] as Granularity[]).map((g) => (
-                        <button
-                            key={g}
-                            onClick={() => setGranularity(g)}
-                            className={`px-4 py-2 rounded-md text-sm ${granularity === g
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-                                }`}
-                        >
-                            {g.charAt(0).toUpperCase() + g.slice(1)}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <TrendChart data={trendData} granularity={granularity} />
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle>
+                            Sales Trends
+                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">Time:</span>
+                            <ToggleGroup
+                                type="single"
+                                value={granularity}
+                                onValueChange={(value) => value && setGranularity(value as Granularity)}
+                            >
+                                {(['daily', 'weekly', 'monthly'] as Granularity[]).map((g) => (
+                                    <ToggleGroupItem
+                                        key={g}
+                                        value={g}
+                                        aria-label={`${g} granularity`}
+                                    >
+                                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                                    </ToggleGroupItem>
+                                ))}
+                            </ToggleGroup>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <TrendChart data={trendData} granularity={granularity} />
+                </CardContent>
+            </Card>
         </div>
     );
 }

@@ -1,32 +1,36 @@
 import type {
     CustomerSegment,
-    RFMSegment,
+    RFMMatrixCell,
 } from '../types';
 import { AdvancedCustomerSegmentation } from './AdvancedCustomerSegmentation';
+import { RFMAnalysis } from './RFMAnalysis';
 
 interface CustomersTabProps {
-    rfmSegments: RFMSegment[];
+    rfmMatrix: RFMMatrixCell[];
     frequencySegments: CustomerSegment[];
-    recencySegments: CustomerSegment[];
+    ageSegments: CustomerSegment[];
+    genderSegments: CustomerSegment[];
     channelSegments: CustomerSegment[];
     aovSegments: CustomerSegment[];
     lifetimeValueSegments: CustomerSegment[];
 }
 
 export function CustomersTab({
-    rfmSegments,
+    rfmMatrix,
     frequencySegments,
-    recencySegments,
+    ageSegments,
+    genderSegments,
     channelSegments,
     aovSegments,
     lifetimeValueSegments,
 }: CustomersTabProps) {
     return (
-        <div>
+        <div className="space-y-8">
+            <RFMAnalysis rfmMatrix={rfmMatrix} />
             <AdvancedCustomerSegmentation
-                rfmSegments={rfmSegments}
                 frequencySegments={frequencySegments}
-                recencySegments={recencySegments}
+                ageSegments={ageSegments}
+                genderSegments={genderSegments}
                 channelSegments={channelSegments}
                 aovSegments={aovSegments}
                 lifetimeValueSegments={lifetimeValueSegments}

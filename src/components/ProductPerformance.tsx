@@ -58,123 +58,118 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Top 25 {viewType === 'product' ? 'Products' : 'Collections'} Performance by Store
-            </h2>
-            <div className="flex gap-6">
-                <div className="flex-1 overflow-visible">
-                    <ResponsiveContainer width="100%" height={800}>
-                        <BarChart
-                            data={chartData}
-                            layout="vertical"
-                            margin={{ top: 5, right: 10, left: -170, bottom: 20 }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis
-                                type="number"
-                                tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`}
-                            />
-                            <YAxis
-                                dataKey="name"
-                                type="category"
-                                width={180}
-                                tick={(props: any) => {
-                                    const { x, y, payload } = props;
-                                    return (
-                                        <g transform={`translate(${x},${y})`}>
-                                            <text
-                                                x={20}
-                                                y={0}
-                                                dy={3}
-                                                textAnchor="start"
-                                                fill="#000000"
-                                                fontSize={14}
-                                                fontWeight="bold"
-                                            >
-                                                {payload.value}
-                                            </text>
-                                        </g>
-                                    );
-                                }}
-                                angle={0}
-                                axisLine={false}
-                                tickLine={false}
-                            />
-                            {storeList.map((storeName, storeIndex) => (
-                                <Bar
-                                    key={storeName}
-                                    dataKey={storeName}
-                                    stackId="stores"
-                                    fill={STORE_COLORS[storeIndex % STORE_COLORS.length]}
-                                    name={storeName}
-                                >
-                                    {chartData.map((entry) => (
-                                        <Cell
-                                            key={`cell-${storeName}-${entry.name}`}
-                                            onMouseEnter={() => handleCellMouseEnter(entry)}
-                                            style={{ cursor: 'pointer' }}
-                                        />
-                                    ))}
-                                </Bar>
-                            ))}
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="w-80 shrink-0">
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 sticky top-4">
-                        {hoveredItem ? (
-                            <>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                    {hoveredItem.name}
-                                </h3>
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                    Total Revenue: <span className="font-bold text-gray-900 dark:text-white">
-                                        ¥{hoveredItem.totalRevenue.toLocaleString('ja-JP')}
-                                    </span>
+        <div className="flex gap-6 -mx-6">
+            <div className="flex-1 overflow-visible">
+                <ResponsiveContainer width="100%" height={800}>
+                    <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 10, left: -170, bottom: 20 }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                            type="number"
+                            tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`}
+                        />
+                        <YAxis
+                            dataKey="name"
+                            type="category"
+                            width={180}
+                            tick={(props: any) => {
+                                const { x, y, payload } = props;
+                                return (
+                                    <g transform={`translate(${x},${y})`}>
+                                        <text
+                                            x={20}
+                                            y={0}
+                                            dy={3}
+                                            textAnchor="start"
+                                            fill="#000000"
+                                            fontSize={14}
+                                            fontWeight="bold"
+                                        >
+                                            {payload.value}
+                                        </text>
+                                    </g>
+                                );
+                            }}
+                            angle={0}
+                            axisLine={false}
+                            tickLine={false}
+                        />
+                        {storeList.map((storeName, storeIndex) => (
+                            <Bar
+                                key={storeName}
+                                dataKey={storeName}
+                                stackId="stores"
+                                fill={STORE_COLORS[storeIndex % STORE_COLORS.length]}
+                                name={storeName}
+                            >
+                                {chartData.map((entry) => (
+                                    <Cell
+                                        key={`cell-${storeName}-${entry.name}`}
+                                        onMouseEnter={() => handleCellMouseEnter(entry)}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                ))}
+                            </Bar>
+                        ))}
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="w-80 shrink-0">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 sticky top-4">
+                    {hoveredItem ? (
+                        <>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                                {hoveredItem.name}
+                            </h3>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                Total Revenue: <span className="font-bold text-gray-900 dark:text-white">
+                                    ¥{hoveredItem.totalRevenue.toLocaleString('ja-JP')}
+                                </span>
+                            </div>
+                            <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                    Store Breakdown:
                                 </div>
-                                <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                                    <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                        Store Breakdown:
-                                    </div>
-                                    {[...hoveredItem.stores]
-                                        .sort((a, b) => b.revenue - a.revenue)
-                                        .map((store) => {
-                                            const percentage = (store.revenue / hoveredItem.totalRevenue) * 100;
-                                            const colorIndex = storeList.indexOf(store.storeName);
-                                            return (
+                                {[...hoveredItem.stores]
+                                    .sort((a, b) => b.revenue - a.revenue)
+                                    .map((store) => {
+                                        const percentage = (store.revenue / hoveredItem.totalRevenue) * 100;
+                                        const colorIndex = storeList.indexOf(store.storeName);
+                                        return (
+                                            <div
+                                                key={store.storeName}
+                                                className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                            >
                                                 <div
-                                                    key={store.storeName}
-                                                    className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                                >
-                                                    <div
-                                                        className="w-4 h-4 rounded shrink-0"
-                                                        style={{
-                                                            backgroundColor: STORE_COLORS[colorIndex % STORE_COLORS.length],
-                                                        }}
-                                                    />
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                            {store.storeName}
-                                                        </div>
-                                                        <div className="text-xs text-gray-600 dark:text-gray-400">
-                                                            ¥{store.revenue.toLocaleString('ja-JP')} ({percentage.toFixed(1)}%)
-                                                        </div>
+                                                    className="w-4 h-4 rounded shrink-0"
+                                                    style={{
+                                                        backgroundColor: STORE_COLORS[colorIndex % STORE_COLORS.length],
+                                                    }}
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                        {store.storeName}
+                                                    </div>
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                                        ¥{store.revenue.toLocaleString('ja-JP')} ({percentage.toFixed(1)}%)
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex items-center justify-center h-[500px] text-gray-400 dark:text-gray-500">
-                                <div className="text-center">
-                                    <p className="text-sm">Hover over a {viewType === 'product' ? 'product' : 'collection'} bar</p>
-                                    <p className="text-xs mt-1">to see store breakdown</p>
-                                </div>
+                                            </div>
+                                        );
+                                    })}
                             </div>
-                        )}
-                    </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center justify-center h-[500px] text-gray-400 dark:text-gray-500">
+                            <div className="text-center">
+                                <p className="text-sm">Hover over a {viewType === 'product' ? 'product' : 'collection'} bar</p>
+                                <p className="text-xs mt-1">to see store breakdown</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

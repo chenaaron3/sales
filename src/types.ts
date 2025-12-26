@@ -129,6 +129,19 @@ export interface RFMSegment {
   mScore: number; // Monetary score (1-4)
 }
 
+export interface RFMMatrixCell {
+  rScore: number; // 1-4
+  fScore: number; // 1-4
+  count: number;
+  totalRevenue: number;
+  averageRevenue: number;
+  averageMScore: number;
+  percentage: number;
+  segments: RFMSegment[]; // Named segments that fall into this bucket
+  recencyRange?: { min: number; max: number }; // Days since last purchase range
+  frequencyRange?: { min: number; max: number }; // Transaction count range
+}
+
 export interface SegmentationDimension {
   dimension: string;
   segments: CustomerSegment[];

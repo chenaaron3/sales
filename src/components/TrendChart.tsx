@@ -8,13 +8,6 @@ interface TrendChartProps {
     granularity: Granularity;
 }
 
-const granularityLabels: Record<Granularity, string> = {
-    daily: 'Daily',
-    '3day': '3-Day',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-    quarterly: 'Quarterly',
-};
 
 // Helper function to get week date range from W format (e.g., "2024-W27")
 const getWeekDateRange = (weekLabel: string): { weekLabel: string; dateRange: string } => {
@@ -87,25 +80,20 @@ const CustomTooltip = ({ active, payload, label, data, granularity }: any) => {
 
 export function TrendChart({ data, granularity }: TrendChartProps) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                {granularityLabels[granularity]} Sales Trends
-            </h2>
-            <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                        dataKey="date"
-                        angle={-45}
-                        textAnchor="end"
-                        height={80}
-                        tick={{ fontSize: 12 }}
-                    />
-                    <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
-                    <Tooltip content={<CustomTooltip data={data} granularity={granularity} />} />
-                    <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                    dataKey="date"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    tick={{ fontSize: 12 }}
+                />
+                <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
+                <Tooltip content={<CustomTooltip data={data} granularity={granularity} />} />
+                <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+            </BarChart>
+        </ResponsiveContainer>
     );
 }

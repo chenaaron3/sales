@@ -3,83 +3,157 @@ import { useState } from 'react';
 import { AttributeTrendsChart } from './AttributeTrends';
 import { ProductPerformanceChart } from './ProductPerformance';
 import { ProductTrendsChart } from './ProductTrendsChart';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 import type { AttributeTrend, PerformanceWithStoreBreakdown, ProductTrend, CollectionTrend } from '../types';
+import type { Granularity } from '../utils/dataAnalysis';
+
+type ViewType = 'product' | 'collection' | 'color' | 'material';
+
 interface ProductTabProps {
-    productTrends: ProductTrend[];
-    collectionTrends: CollectionTrend[];
+    productTrendsWeekly: ProductTrend[];
+    productTrendsMonthly: ProductTrend[];
+    collectionTrendsWeekly: CollectionTrend[];
+    collectionTrendsMonthly: CollectionTrend[];
     productPerformanceWithStores: PerformanceWithStoreBreakdown[];
     collectionPerformanceWithStores: PerformanceWithStoreBreakdown[];
+    colorPerformanceWithStores: PerformanceWithStoreBreakdown[];
+    materialPerformanceWithStores: PerformanceWithStoreBreakdown[];
     colorTrends: AttributeTrend[];
     materialTrends: AttributeTrend[];
 }
 
 export function ProductTab({
-    productTrends,
-    collectionTrends,
+    productTrendsWeekly,
+    productTrendsMonthly,
+    collectionTrendsWeekly,
+    collectionTrendsMonthly,
     productPerformanceWithStores,
     collectionPerformanceWithStores,
+    colorPerformanceWithStores,
+    materialPerformanceWithStores,
     colorTrends,
     materialTrends,
 }: ProductTabProps) {
-    const [productViewType, setProductViewType] = useState<'product' | 'collection'>('product');
-    const [attributeType, setAttributeType] = useState<'color' | 'material'>('color');
+    const [viewType, setViewType] = useState<ViewType>('product');
+    const [granularity, setGranularity] = useState<Granularity>('monthly');
+
+    const viewTypeLabels: Record<ViewType, string> = {
+        product: 'Product',
+        collection: 'Collection',
+        color: 'Color',
+        material: 'Material',
+    };
+
+    // Determine which data to show based on view type
+    const performanceData = viewType === 'product'
+        ? productPerformanceWithStores
+        : viewType === 'collection'
+            ? collectionPerformanceWithStores
+            : viewType === 'color'
+                ? colorPerformanceWithStores
+                : materialPerformanceWithStores;
+
+    // Get trends data based on view type and granularity
+    const getTrendsData = () => {
+        if (viewType === 'product') {
+            return granularity === 'weekly'
+                ? productTrendsWeekly
+                : productTrendsMonthly;
+        } else if (viewType === 'collection') {
+            return granularity === 'weekly'
+                ? collectionTrendsWeekly
+                : collectionTrendsMonthly;
+        } else {
+            return viewType === 'color' ? colorTrends : materialTrends;
+        }
+    };
+
+    const trendsData = getTrendsData();
 
     return (
         <div className="space-y-8">
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    View By
-                </label>
-                <div className="flex gap-2 mb-4">
-                    {(['product', 'collection'] as const).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setProductViewType(type)}
-                            className={`px-4 py-2 rounded-md text-sm ${productViewType === type
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-                                }`}
-                        >
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <ProductPerformanceChart
-                data={productViewType === 'product' ? productPerformanceWithStores : collectionPerformanceWithStores}
-                viewType={productViewType}
-            />
+            {/* Performance Chart */}
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle>
+                            Top 25 {viewTypeLabels[viewType]}s Performance by Store
+                        </CardTitle>
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-muted-foreground">View:</span>
+                            <ToggleGroup
+                                type="single"
+                                value={viewType}
+                                onValueChange={(value) => value && setViewType(value as ViewType)}
+                            >
+                                {(['product', 'collection', 'color', 'material'] as ViewType[]).map((type) => (
+                                    <ToggleGroupItem
+                                        key={type}
+                                        value={type}
+                                        aria-label={`${type} view`}
+                                    >
+                                        {viewTypeLabels[type]}
+                                    </ToggleGroupItem>
+                                ))}
+                            </ToggleGroup>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <ProductPerformanceChart
+                        data={performanceData}
+                        viewType={viewType === 'product' ? 'product' : viewType === 'collection' ? 'collection' : 'product'}
+                    />
+                </CardContent>
+            </Card>
 
-            <ProductTrendsChart
-                productData={productTrends}
-                collectionData={collectionTrends}
-                viewType={productViewType}
-            />
-
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Attribute Type
-                </label>
-                <div className="flex gap-2">
-                    {(['color', 'material'] as const).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setAttributeType(type)}
-                            className={`px-4 py-2 rounded-md text-sm ${attributeType === type
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
-                                }`}
-                        >
-                            {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <AttributeTrendsChart
-                data={attributeType === 'color' ? colorTrends : materialTrends}
-                attribute={attributeType}
-            />
+            {/* Trends Chart */}
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle>
+                            {viewTypeLabels[viewType]} Trends Over Time
+                        </CardTitle>
+                        {(viewType === 'product' || viewType === 'collection') && (
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Time:</span>
+                                <ToggleGroup
+                                    type="single"
+                                    value={granularity}
+                                    onValueChange={(value) => value && setGranularity(value as Granularity)}
+                                >
+                                    {(['weekly', 'monthly'] as Granularity[]).map((g) => (
+                                        <ToggleGroupItem
+                                            key={g}
+                                            value={g}
+                                            aria-label={`${g} granularity`}
+                                        >
+                                            {g.charAt(0).toUpperCase() + g.slice(1)}
+                                        </ToggleGroupItem>
+                                    ))}
+                                </ToggleGroup>
+                            </div>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    {(viewType === 'product' || viewType === 'collection') ? (
+                        <ProductTrendsChart
+                            productData={granularity === 'weekly' ? productTrendsWeekly : productTrendsMonthly}
+                            collectionData={granularity === 'weekly' ? collectionTrendsWeekly : collectionTrendsMonthly}
+                            viewType={viewType as 'product' | 'collection'}
+                            granularity={granularity}
+                        />
+                    ) : (
+                        <AttributeTrendsChart
+                            data={trendsData as AttributeTrend[]}
+                            attribute={viewType as 'color' | 'material'}
+                        />
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }

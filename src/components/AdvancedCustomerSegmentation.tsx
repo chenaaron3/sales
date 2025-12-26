@@ -1,45 +1,47 @@
 import { useState } from 'react';
 import {
-    Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, PolarAngleAxis, PolarGrid,
-    PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+    Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis,
+    YAxis
 } from 'recharts';
 
-import type { CustomerSegment, RFMSegment } from '../types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
+import type { CustomerSegment } from '../types';
 interface AdvancedCustomerSegmentationProps {
-    rfmSegments: RFMSegment[];
     frequencySegments: CustomerSegment[];
-    recencySegments: CustomerSegment[];
+    ageSegments: CustomerSegment[];
+    genderSegments: CustomerSegment[];
     channelSegments: CustomerSegment[];
     aovSegments: CustomerSegment[];
     lifetimeValueSegments: CustomerSegment[];
 }
 
-type SegmentationType = 'rfm' | 'frequency' | 'recency' | 'channel' | 'aov' | 'lifetimeValue';
+type SegmentationType = 'frequency' | 'age' | 'gender' | 'channel' | 'aov' | 'lifetimeValue';
 
 export function AdvancedCustomerSegmentation({
-    rfmSegments,
     frequencySegments,
-    recencySegments,
+    ageSegments,
+    genderSegments,
     channelSegments,
     aovSegments,
     lifetimeValueSegments,
 }: AdvancedCustomerSegmentationProps) {
-    const [activeSegment, setActiveSegment] = useState<SegmentationType>('rfm');
+    const [activeSegment, setActiveSegment] = useState<SegmentationType>('frequency');
 
     const segmentData = {
-        rfm: rfmSegments,
         frequency: frequencySegments,
-        recency: recencySegments,
+        age: ageSegments,
+        gender: genderSegments,
         channel: channelSegments,
         aov: aovSegments,
         lifetimeValue: lifetimeValueSegments,
     };
 
     const segmentLabels: Record<SegmentationType, string> = {
-        rfm: 'RFM Analysis',
         frequency: 'Purchase Frequency',
-        recency: 'Recency',
+        age: 'Age',
+        gender: 'Gender',
         channel: 'Channel Preference',
         aov: 'Average Order Value',
         lifetimeValue: 'Lifetime Value',
@@ -54,190 +56,156 @@ export function AdvancedCustomerSegmentation({
     }));
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Advanced Customer Segmentation
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Explore different ways to segment your customer base for targeted marketing and insights
-            </p>
-
-            {/* Segmentation Type Selector */}
-            <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Segmentation Dimension
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {(['rfm', 'frequency', 'recency', 'channel', 'aov', 'lifetimeValue'] as SegmentationType[]).map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setActiveSegment(type)}
-                            className={`px-4 py-2 rounded-md text-sm ${activeSegment === type
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                }`}
+        <Card className="mb-8">
+            <CardHeader>
+                <CardTitle className="text-2xl">
+                    Advanced Customer Segmentation
+                </CardTitle>
+                <CardDescription>
+                    Explore different ways to segment your customer base for targeted marketing and insights
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {/* Segmentation Type Selector */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Segmentation Dimension
+                        </label>
+                        <ToggleGroup
+                            type="single"
+                            value={activeSegment}
+                            onValueChange={(value) => value && setActiveSegment(value as SegmentationType)}
                         >
-                            {segmentLabels[type]}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Chart and Details */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pie Chart */}
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        {segmentLabels[activeSegment]} Distribution
-                    </h3>
-                    <ResponsiveContainer width="100%" height={350}>
-                        <PieChart margin={{ top: 20, right: 150, bottom: 20, left: 150 }}>
-                            <Pie
-                                data={chartData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={true}
-                                label={(entry: any) => `${entry.segment}: ${entry.percentage.toFixed(1)}%`}
-                                outerRadius={80}
-                                fill="#8884d8"
-                                dataKey="count"
-                                nameKey="segment"
-                            >
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                formatter={(value: number | undefined) => value?.toLocaleString('ja-JP') || ''}
-                                content={(props: any) => {
-                                    if (!props.active || !props.payload?.[0]) return null;
-                                    const data = props.payload[0].payload;
-                                    return (
-                                        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
-                                            <p className="font-semibold text-gray-900 dark:text-white">{data.segment}</p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                Count: {data.count.toLocaleString('ja-JP')}
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                Percentage: {data.percentage.toFixed(1)}%
-                                            </p>
-                                        </div>
-                                    );
-                                }}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
+                            {(['frequency', 'age', 'gender', 'channel', 'aov', 'lifetimeValue'] as SegmentationType[]).map((type) => (
+                                <ToggleGroupItem
+                                    key={type}
+                                    value={type}
+                                    aria-label={segmentLabels[type]}
+                                >
+                                    {segmentLabels[type]}
+                                </ToggleGroupItem>
+                            ))}
+                        </ToggleGroup>
+                    </div>
                 </div>
 
-                {/* Bar Chart - Revenue by Segment */}
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        Revenue by Segment
-                    </h3>
-                    <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" tickFormatter={(value) => `¥${(value / 1000000).toFixed(1)}M`} />
-                            <YAxis dataKey="segment" type="category" width={140} tick={{ fontSize: 11 }} />
-                            <Tooltip formatter={(value: number | undefined) => value ? `¥${value.toLocaleString('ja-JP')}` : ''} />
-                            <Legend />
-                            <Bar dataKey="totalRevenue" fill="#8884d8" name="Total Revenue">
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
+                {/* Chart and Details */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Pie Chart */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            {segmentLabels[activeSegment]} Distribution
+                        </h3>
+                        <ResponsiveContainer width="100%" height={350}>
+                            <PieChart margin={{ top: 20, right: 150, bottom: 20, left: 150 }}>
+                                <Pie
+                                    data={chartData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={true}
+                                    label={(entry: any) => `${entry.segment}: ${entry.percentage.toFixed(1)}%`}
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="count"
+                                    nameKey="segment"
+                                >
+                                    {chartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={(value: number | undefined) => value?.toLocaleString('ja-JP') || ''}
+                                    content={(props: any) => {
+                                        if (!props.active || !props.payload?.[0]) return null;
+                                        const data = props.payload[0].payload;
+                                        return (
+                                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
+                                                <p className="font-semibold text-gray-900 dark:text-white">{data.segment}</p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    Count: {data.count.toLocaleString('ja-JP')}
+                                                </p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    Percentage: {data.percentage.toFixed(1)}%
+                                                </p>
+                                            </div>
+                                        );
+                                    }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
 
-            {/* Detailed Segment Information */}
-            <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Segment Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {chartData.map((segment, index) => {
-                        // Only show RFM radar chart for RFM segments
-                        const isRFM = activeSegment === 'rfm' && 'rScore' in segment;
-                        const rfmData = isRFM ? [
-                            { axis: 'Recency', value: segment.rScore, fullMark: 4 },
-                            { axis: 'Frequency', value: segment.fScore, fullMark: 4 },
-                            { axis: 'Monetary', value: segment.mScore, fullMark: 4 },
-                        ] : null;
-
-                        return (
-                            <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div
-                                        className="w-4 h-4 rounded"
-                                        style={{ backgroundColor: segment.fill }}
-                                    />
-                                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                                        {segment.segment}
-                                    </h4>
-                                </div>
-                                {'description' in segment && segment.description && (
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 italic">
-                                        {segment.description}
-                                    </p>
-                                )}
-                                {isRFM && rfmData && (
-                                    <div className="mb-3">
-                                        <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">RFM Scores</div>
-                                        <ResponsiveContainer width="100%" height={150}>
-                                            <RadarChart data={rfmData}>
-                                                <PolarGrid stroke="#e5e7eb" />
-                                                <PolarAngleAxis
-                                                    dataKey="axis"
-                                                    tick={{ fontSize: 10, fill: '#6b7280' }}
-                                                />
-                                                <PolarRadiusAxis
-                                                    angle={90}
-                                                    domain={[0, 4]}
-                                                    tick={false}
-                                                    axisLine={false}
-                                                />
-                                                <Radar
-                                                    name="RFM"
-                                                    dataKey="value"
-                                                    stroke={segment.fill}
-                                                    fill={segment.fill}
-                                                    fillOpacity={0.6}
-                                                />
-                                            </RadarChart>
-                                        </ResponsiveContainer>
-                                        <div className="flex justify-center gap-4 mt-1 text-xs text-gray-600 dark:text-gray-400">
-                                            <span>R: {segment.rScore.toFixed(1)}</span>
-                                            <span>F: {segment.fScore.toFixed(1)}</span>
-                                            <span>M: {segment.mScore.toFixed(1)}</span>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                                    <div className="flex justify-between">
-                                        <span>Count:</span>
-                                        <span className="font-medium">{segment.count.toLocaleString('ja-JP')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Percentage:</span>
-                                        <span className="font-medium">{segment.percentage.toFixed(1)}%</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Total Revenue:</span>
-                                        <span className="font-medium">¥{segment.totalRevenue.toLocaleString('ja-JP')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Avg per Customer:</span>
-                                        <span className="font-medium">¥{Math.round(segment.averageRevenue).toLocaleString('ja-JP')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {/* Bar Chart - Revenue by Segment */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Revenue by Segment
+                        </h3>
+                        <ResponsiveContainer width="100%" height={350}>
+                            <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" tickFormatter={(value) => `¥${(value / 1000000).toFixed(1)}M`} />
+                                <YAxis dataKey="segment" type="category" width={140} tick={{ fontSize: 11 }} />
+                                <Tooltip
+                                    content={(props: any) => {
+                                        if (!props.active || !props.payload?.[0]) return null;
+                                        const data = props.payload[0].payload;
+                                        // Calculate LTV: average lifetime value per customer = totalRevenue / customerCount
+                                        const ltv = data.count > 0 ? data.totalRevenue / data.count : 0;
+                                        return (
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{data.segment}</p>
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <div
+                                                            className="w-3 h-3 rounded-sm"
+                                                            style={{ backgroundColor: data.fill }}
+                                                        />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                            Total Revenue:
+                                                        </span>
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            ¥{data.totalRevenue.toLocaleString('ja-JP')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'transparent' }} />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                            AOV:
+                                                        </span>
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            ¥{Math.round(data.averageRevenue).toLocaleString('ja-JP')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'transparent' }} />
+                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                            LTV:
+                                                        </span>
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            ¥{Math.round(ltv).toLocaleString('ja-JP')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400 pt-1">
+                                                        {data.count.toLocaleString('ja-JP')} customers ({data.percentage.toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }}
+                                />
+                                <Legend />
+                                <Bar dataKey="totalRevenue" fill="#8884d8" name="Total Revenue">
+                                    {chartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }
 

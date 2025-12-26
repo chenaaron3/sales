@@ -12,6 +12,7 @@ import type {
   DayOfWeekData,
   CustomerDetail,
   RFMSegment,
+  RFMMatrixCell,
   ProductTrend,
   BrandCollectionPerformance,
   ProductStorePerformance,
@@ -742,7 +743,7 @@ export function getRFMSegments(salesData: SalesRecord[]): RFMSegment[] {
 
   if (customers.length === 0) return [];
 
-  // Calculate quartiles for R, F, M
+  // Calculate quartiles for R, F, M using percentile-based approach
   const recencies = customers
     .map((c) => c.daysSinceLastPurchase)
     .sort((a, b) => a - b);
@@ -751,17 +752,19 @@ export function getRFMSegments(salesData: SalesRecord[]): RFMSegment[] {
     .sort((a, b) => a - b);
   const monetaries = customers.map((c) => c.totalRevenue).sort((a, b) => a - b);
 
-  const r25 = recencies[Math.floor(recencies.length * 0.25)] || 0;
-  const r50 = recencies[Math.floor(recencies.length * 0.5)] || 0;
-  const r75 = recencies[Math.floor(recencies.length * 0.75)] || 0;
+  // Use percentile indices to get thresholds for M score
+  const getPercentileValue = (
+    sortedArray: number[],
+    percentile: number
+  ): number => {
+    if (sortedArray.length === 0) return 0;
+    const index = Math.floor(sortedArray.length * percentile);
+    return sortedArray[Math.min(index, sortedArray.length - 1)];
+  };
 
-  const f25 = frequencies[Math.floor(frequencies.length * 0.25)] || 0;
-  const f50 = frequencies[Math.floor(frequencies.length * 0.5)] || 0;
-  const f75 = frequencies[Math.floor(frequencies.length * 0.75)] || 0;
-
-  const m25 = monetaries[Math.floor(monetaries.length * 0.25)] || 0;
-  const m50 = monetaries[Math.floor(monetaries.length * 0.5)] || 0;
-  const m75 = monetaries[Math.floor(monetaries.length * 0.75)] || 0;
+  const m25 = getPercentileValue(monetaries, 0.25);
+  const m50 = getPercentileValue(monetaries, 0.5);
+  const m75 = getPercentileValue(monetaries, 0.75);
 
   const segmentMap = new Map<
     string,
@@ -775,26 +778,65 @@ export function getRFMSegments(salesData: SalesRecord[]): RFMSegment[] {
     }
   >();
 
+  // Create maps for quick lookup of customer position in sorted arrays
+  const recencyMap = new Map<number, number[]>();
+  recencies.forEach((recency, index) => {
+    if (!recencyMap.has(recency)) {
+      recencyMap.set(recency, []);
+    }
+    recencyMap.get(recency)!.push(index);
+  });
+
+  const frequencyMap = new Map<number, number[]>();
+  frequencies.forEach((freq, index) => {
+    if (!frequencyMap.has(freq)) {
+      frequencyMap.set(freq, []);
+    }
+    frequencyMap.get(freq)!.push(index);
+  });
+
   customers.forEach((customer) => {
     // Score R (Recency - lower is better, so invert)
-    const rScore =
-      customer.daysSinceLastPurchase <= r25
-        ? 4
-        : customer.daysSinceLastPurchase <= r50
-        ? 3
-        : customer.daysSinceLastPurchase <= r75
-        ? 2
-        : 1;
+    // Use percentile-based assignment for better distribution
+    const customerRecency = customer.daysSinceLastPurchase;
+    const recencyIndices = recencyMap.get(customerRecency) || [];
+    const avgRecencyIndex =
+      recencyIndices.length > 0
+        ? recencyIndices.reduce((sum, idx) => sum + idx, 0) /
+          recencyIndices.length
+        : recencies.length / 2;
+    const recencyPercentile = avgRecencyIndex / recencies.length;
 
-    // Score F (Frequency)
-    const fScore =
-      customer.transactionCount >= f75
-        ? 4
-        : customer.transactionCount >= f50
-        ? 3
-        : customer.transactionCount >= f25
-        ? 2
-        : 1;
+    let rScore: number;
+    if (recencyPercentile <= 0.25) {
+      rScore = 4;
+    } else if (recencyPercentile <= 0.5) {
+      rScore = 3;
+    } else if (recencyPercentile <= 0.75) {
+      rScore = 2;
+    } else {
+      rScore = 1;
+    }
+
+    // Score F (Frequency - higher is better)
+    const customerFreq = customer.transactionCount;
+    const freqIndices = frequencyMap.get(customerFreq) || [];
+    const avgFreqIndex =
+      freqIndices.length > 0
+        ? freqIndices.reduce((sum, idx) => sum + idx, 0) / freqIndices.length
+        : frequencies.length / 2;
+    const freqPercentile = avgFreqIndex / frequencies.length;
+
+    let fScore: number;
+    if (freqPercentile >= 0.75) {
+      fScore = 4;
+    } else if (freqPercentile >= 0.5) {
+      fScore = 3;
+    } else if (freqPercentile >= 0.25) {
+      fScore = 2;
+    } else {
+      fScore = 1;
+    }
 
     // Score M (Monetary)
     const mScore =
@@ -885,6 +927,211 @@ export function getRFMSegments(salesData: SalesRecord[]): RFMSegment[] {
   return result;
 }
 
+// RFM Matrix - Distribute customers across all R-F buckets
+export function getRFMMatrix(salesData: SalesRecord[]): RFMMatrixCell[] {
+  const customerDetails = getCustomerDetails(salesData);
+  const customers = Array.from(customerDetails.values());
+
+  if (customers.length === 0) return [];
+
+  // Calculate quartiles for M score
+  const monetaries = customers.map((c) => c.totalRevenue).sort((a, b) => a - b);
+
+  // Use percentile indices to get thresholds for M score
+  const getPercentileValue = (
+    sortedArray: number[],
+    percentile: number
+  ): number => {
+    if (sortedArray.length === 0) return 0;
+    const index = Math.floor(sortedArray.length * percentile);
+    return sortedArray[Math.min(index, sortedArray.length - 1)];
+  };
+
+  const m25 = getPercentileValue(monetaries, 0.25);
+  const m50 = getPercentileValue(monetaries, 0.5);
+  const m75 = getPercentileValue(monetaries, 0.75);
+
+  // Initialize matrix cells for all 16 combinations (4x4)
+  const matrixMap = new Map<
+    string,
+    {
+      count: number;
+      revenue: number;
+      mScoreSum: number;
+      segments: Set<string>;
+    }
+  >();
+
+  // Initialize all 16 cells
+  for (let r = 1; r <= 4; r++) {
+    for (let f = 1; f <= 4; f++) {
+      const key = `${r}-${f}`;
+      matrixMap.set(key, {
+        count: 0,
+        revenue: 0,
+        mScoreSum: 0,
+        segments: new Set(),
+      });
+    }
+  }
+
+  // Also get named segments for reference
+  const rfmSegments = getRFMSegments(salesData);
+  const segmentMap = new Map<string, RFMSegment[]>();
+  rfmSegments.forEach((segment) => {
+    const r = Math.round(segment.rScore);
+    const f = Math.round(segment.fScore);
+    const key = `${r}-${f}`;
+    if (!segmentMap.has(key)) {
+      segmentMap.set(key, []);
+    }
+    segmentMap.get(key)!.push(segment);
+  });
+
+  // Create customer-to-index maps for sequential assignment
+  // Sort customers by recency and frequency, then assign sequentially to ensure even distribution
+  const customersByRecency = [...customers].sort(
+    (a, b) => a.daysSinceLastPurchase - b.daysSinceLastPurchase
+  );
+  const customersByFrequency = [...customers].sort(
+    (a, b) => b.transactionCount - a.transactionCount // Descending for frequency (higher is better)
+  );
+
+  const customerToRecencyIndex = new Map<string, number>();
+  const customerToFrequencyIndex = new Map<string, number>();
+
+  customersByRecency.forEach((customer, index) => {
+    customerToRecencyIndex.set(customer.memberId, index);
+  });
+
+  customersByFrequency.forEach((customer, index) => {
+    customerToFrequencyIndex.set(customer.memberId, index);
+  });
+
+  // Process each customer and assign to R-F bucket
+  // Use sequential assignment to ensure each quartile gets ~25% of customers
+  const quartileSize = Math.ceil(customers.length / 4);
+
+  customers.forEach((customer) => {
+    // Score R (Recency - lower is better, so first 25% get score 4)
+    const recencyIndex = customerToRecencyIndex.get(customer.memberId) ?? 0;
+
+    let rScore: number;
+    if (recencyIndex < quartileSize) {
+      rScore = 4;
+    } else if (recencyIndex < quartileSize * 2) {
+      rScore = 3;
+    } else if (recencyIndex < quartileSize * 3) {
+      rScore = 2;
+    } else {
+      rScore = 1;
+    }
+
+    // Score F (Frequency - higher is better, so first 25% get score 4)
+    const freqIndex = customerToFrequencyIndex.get(customer.memberId) ?? 0;
+
+    let fScore: number;
+    if (freqIndex < quartileSize) {
+      fScore = 4;
+    } else if (freqIndex < quartileSize * 2) {
+      fScore = 3;
+    } else if (freqIndex < quartileSize * 3) {
+      fScore = 2;
+    } else {
+      fScore = 1;
+    }
+
+    // Score M (Monetary)
+    const mScore =
+      customer.totalRevenue >= m75
+        ? 4
+        : customer.totalRevenue >= m50
+        ? 3
+        : customer.totalRevenue >= m25
+        ? 2
+        : 1;
+
+    const key = `${rScore}-${fScore}`;
+    const cell = matrixMap.get(key)!;
+    cell.count++;
+    cell.revenue += customer.totalRevenue;
+    cell.mScoreSum += mScore;
+
+    // Add segment name if this customer matches a named segment
+    // We'll match based on the segment's R-F range
+    rfmSegments.forEach((segment) => {
+      const segR = Math.round(segment.rScore);
+      const segF = Math.round(segment.fScore);
+      if (segR === rScore && segF === fScore) {
+        cell.segments.add(segment.segment);
+      }
+    });
+  });
+
+  // Calculate ranges for each R and F bucket
+  // Note: Score 4 = best (first quartile), Score 1 = worst (last quartile)
+  const recencyRanges: { [key: number]: { min: number; max: number } } = {};
+  const frequencyRanges: { [key: number]: { min: number; max: number } } = {};
+
+  for (let score = 1; score <= 4; score++) {
+    // Reverse the mapping: score 4 = first quartile, score 1 = last quartile
+    const quartileNumber = 5 - score; // 4->1, 3->2, 2->3, 1->4
+    const startIdx = (quartileNumber - 1) * quartileSize;
+    const endIdx =
+      quartileNumber === 4 ? customers.length : quartileNumber * quartileSize;
+
+    // Recency ranges (ascending order - lower days = better, so score 4 gets first quartile)
+    if (startIdx < customersByRecency.length) {
+      const recencySlice = customersByRecency.slice(startIdx, endIdx);
+      if (recencySlice.length > 0) {
+        recencyRanges[score] = {
+          min: recencySlice[0].daysSinceLastPurchase,
+          max: recencySlice[recencySlice.length - 1].daysSinceLastPurchase,
+        };
+      }
+    }
+
+    // Frequency ranges (descending order - higher transactions = better, so score 4 gets first quartile)
+    if (startIdx < customersByFrequency.length) {
+      const freqSlice = customersByFrequency.slice(startIdx, endIdx);
+      if (freqSlice.length > 0) {
+        frequencyRanges[score] = {
+          min: freqSlice[freqSlice.length - 1].transactionCount,
+          max: freqSlice[0].transactionCount,
+        };
+      }
+    }
+  }
+
+  // Convert to array format
+  const result: RFMMatrixCell[] = [];
+  for (let r = 1; r <= 4; r++) {
+    for (let f = 1; f <= 4; f++) {
+      const key = `${r}-${f}`;
+      const cell = matrixMap.get(key)!;
+      const segments = Array.from(cell.segments)
+        .map((segName) => rfmSegments.find((s) => s.segment === segName))
+        .filter((s): s is RFMSegment => s !== undefined);
+
+      result.push({
+        rScore: r,
+        fScore: f,
+        count: cell.count,
+        totalRevenue: cell.revenue,
+        averageRevenue: cell.count > 0 ? cell.revenue / cell.count : 0,
+        averageMScore: cell.count > 0 ? cell.mScoreSum / cell.count : 0,
+        percentage:
+          customers.length > 0 ? (cell.count / customers.length) * 100 : 0,
+        segments,
+        recencyRange: recencyRanges[r],
+        frequencyRange: frequencyRanges[f],
+      });
+    }
+  }
+
+  return result;
+}
+
 // Purchase Frequency Segmentation
 export function getFrequencySegments(
   salesData: SalesRecord[]
@@ -923,26 +1170,36 @@ export function getFrequencySegments(
     },
   ];
 
+  // Track transaction counts for AOV calculation
+  const segmentTransactionCounts = [0, 0, 0, 0];
+
   customers.forEach((customer) => {
     if (customer.transactionCount >= 10) {
       segments[0].count++;
       segments[0].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[0] += customer.transactionCount;
     } else if (customer.transactionCount >= 5) {
       segments[1].count++;
       segments[1].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[1] += customer.transactionCount;
     } else if (customer.transactionCount >= 2) {
       segments[2].count++;
       segments[2].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[2] += customer.transactionCount;
     } else {
       segments[3].count++;
       segments[3].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[3] += customer.transactionCount;
     }
   });
 
   const totalCustomers = customers.length;
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
     segment.averageRevenue =
-      segment.count > 0 ? segment.totalRevenue / segment.count : 0;
+      segmentTransactionCounts[index] > 0
+        ? segment.totalRevenue / segmentTransactionCounts[index]
+        : 0;
     segment.percentage =
       totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
   });
@@ -988,26 +1245,36 @@ export function getRecencySegments(
     },
   ];
 
+  // Track transaction counts for AOV calculation
+  const segmentTransactionCounts = [0, 0, 0, 0];
+
   customers.forEach((customer) => {
     if (customer.daysSinceLastPurchase <= 30) {
       segments[0].count++;
       segments[0].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[0] += customer.transactionCount;
     } else if (customer.daysSinceLastPurchase <= 90) {
       segments[1].count++;
       segments[1].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[1] += customer.transactionCount;
     } else if (customer.daysSinceLastPurchase <= 180) {
       segments[2].count++;
       segments[2].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[2] += customer.transactionCount;
     } else {
       segments[3].count++;
       segments[3].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[3] += customer.transactionCount;
     }
   });
 
   const totalCustomers = customers.length;
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
     segment.averageRevenue =
-      segment.count > 0 ? segment.totalRevenue / segment.count : 0;
+      segmentTransactionCounts[index] > 0
+        ? segment.totalRevenue / segmentTransactionCounts[index]
+        : 0;
     segment.percentage =
       totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
   });
@@ -1065,6 +1332,9 @@ export function getChannelSegments(
     }
   });
 
+  // Track transaction counts for AOV calculation
+  const segmentTransactionCounts = [0, 0, 0];
+
   customers.forEach((customer) => {
     const channels = customerChannelMap.get(customer.memberId);
     if (!channels) return;
@@ -1072,19 +1342,25 @@ export function getChannelSegments(
     if (channels.online && channels.store) {
       segments[1].count++;
       segments[1].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[1] += customer.transactionCount;
     } else if (channels.online) {
       segments[0].count++;
       segments[0].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[0] += customer.transactionCount;
     } else {
       segments[2].count++;
       segments[2].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[2] += customer.transactionCount;
     }
   });
 
   const totalCustomers = customers.length;
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
     segment.averageRevenue =
-      segment.count > 0 ? segment.totalRevenue / segment.count : 0;
+      segmentTransactionCounts[index] > 0
+        ? segment.totalRevenue / segmentTransactionCounts[index]
+        : 0;
     segment.percentage =
       totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
   });
@@ -1121,28 +1397,318 @@ export function getAOVSegments(salesData: SalesRecord[]): CustomerSegment[] {
     },
   ];
 
+  // Track transaction counts for AOV calculation
+  const segmentTransactionCounts = [0, 0, 0];
+
   customers.forEach((customer) => {
     if (customer.averageOrderValue >= 15000) {
       segments[0].count++;
       segments[0].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[0] += customer.transactionCount;
     } else if (customer.averageOrderValue >= 8000) {
       segments[1].count++;
       segments[1].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[1] += customer.transactionCount;
     } else {
       segments[2].count++;
       segments[2].totalRevenue += customer.totalRevenue;
+      segmentTransactionCounts[2] += customer.transactionCount;
     }
   });
 
   const totalCustomers = customers.length;
-  segments.forEach((segment) => {
+  segments.forEach((segment, index) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
     segment.averageRevenue =
-      segment.count > 0 ? segment.totalRevenue / segment.count : 0;
+      segmentTransactionCounts[index] > 0
+        ? segment.totalRevenue / segmentTransactionCounts[index]
+        : 0;
     segment.percentage =
       totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
   });
 
   return segments;
+}
+
+// Age Segmentation
+export function getAgeSegments(
+  salesData: SalesRecord[],
+  memberData: MemberRecord[]
+): CustomerSegment[] {
+  // Create a map of memberId to member info
+  const memberMap = new Map<string, MemberRecord>();
+  memberData.forEach((member) => {
+    if (member.memberId) {
+      memberMap.set(member.memberId, member);
+    }
+  });
+
+  // Calculate customer revenue and transaction counts
+  const customerRevenueMap = new Map<string, number>();
+  const customerTransactionCountMap = new Map<string, number>();
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+    const current = customerRevenueMap.get(sale.memberId) || 0;
+    customerRevenueMap.set(sale.memberId, current + sale.amount);
+    const currentCount = customerTransactionCountMap.get(sale.memberId) || 0;
+    customerTransactionCountMap.set(sale.memberId, currentCount + 1);
+  });
+
+  // Helper function to calculate age from birthDate
+  const calculateAge = (birthDateStr: string | null): number | null => {
+    if (!birthDateStr) return null;
+    // Try to parse different date formats
+    const dateMatch = birthDateStr.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})/);
+    if (!dateMatch) return null;
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const birthDate = new Date(year, month, day);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  // Helper function to get age group
+  const getAgeGroup = (age: number | null): string => {
+    if (age === null) return "Unknown";
+    if (age < 20) return "Under 20";
+    if (age < 30) return "20-29";
+    if (age < 40) return "30-39";
+    if (age < 50) return "40-49";
+    if (age < 60) return "50-59";
+    if (age < 70) return "60-69";
+    return "70+";
+  };
+
+  // Initialize segments for age groups
+  const ageSegments: CustomerSegment[] = [
+    {
+      segment: "Under 20",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "20-29",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "30-39",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "40-49",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "50-59",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "60-69",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "70+",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "Unknown",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+  ];
+
+  // Track transaction counts per segment for AOV calculation
+  const segmentTransactionCounts = new Map<string, number>();
+  ageSegments.forEach((seg) => segmentTransactionCounts.set(seg.segment, 0));
+
+  // Process each customer
+  customerRevenueMap.forEach((revenue, memberId) => {
+    const member = memberMap.get(memberId);
+    const transactionCount = customerTransactionCountMap.get(memberId) || 0;
+
+    // Age segmentation
+    const age = member ? calculateAge(member.birthDate) : null;
+    const ageGroup = getAgeGroup(age);
+    const ageSegment = ageSegments.find((s) => s.segment === ageGroup);
+    if (ageSegment) {
+      ageSegment.count++;
+      ageSegment.totalRevenue += revenue;
+      segmentTransactionCounts.set(
+        ageGroup,
+        (segmentTransactionCounts.get(ageGroup) || 0) + transactionCount
+      );
+    }
+  });
+
+  // Calculate averages and percentages
+  const totalCustomers = customerRevenueMap.size;
+
+  ageSegments.forEach((segment) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
+    const totalTransactions =
+      segmentTransactionCounts.get(segment.segment) || 0;
+    segment.averageRevenue =
+      totalTransactions > 0 ? segment.totalRevenue / totalTransactions : 0;
+    segment.percentage =
+      totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
+  });
+
+  // Filter out segments with 0 count
+  return ageSegments.filter((s) => s.count > 0);
+}
+
+// Gender Segmentation
+export function getGenderSegments(
+  salesData: SalesRecord[],
+  memberData: MemberRecord[]
+): CustomerSegment[] {
+  // Create a map of memberId to member info
+  const memberMap = new Map<string, MemberRecord>();
+  memberData.forEach((member) => {
+    if (member.memberId) {
+      memberMap.set(member.memberId, member);
+    }
+  });
+
+  // Calculate customer revenue and transaction counts
+  const customerRevenueMap = new Map<string, number>();
+  const customerTransactionCountMap = new Map<string, number>();
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+    const current = customerRevenueMap.get(sale.memberId) || 0;
+    customerRevenueMap.set(sale.memberId, current + sale.amount);
+    const currentCount = customerTransactionCountMap.get(sale.memberId) || 0;
+    customerTransactionCountMap.set(sale.memberId, currentCount + 1);
+  });
+
+  // Initialize segments for gender
+  const genderSegments: CustomerSegment[] = [
+    {
+      segment: "Male",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "Female",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "Other",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+    {
+      segment: "Unknown",
+      count: 0,
+      totalRevenue: 0,
+      averageRevenue: 0,
+      percentage: 0,
+    },
+  ];
+
+  // Track transaction counts per segment for AOV calculation
+  const segmentTransactionCounts = new Map<string, number>();
+  genderSegments.forEach((seg) => segmentTransactionCounts.set(seg.segment, 0));
+
+  // Process each customer
+  customerRevenueMap.forEach((revenue, memberId) => {
+    const member = memberMap.get(memberId);
+    const transactionCount = customerTransactionCountMap.get(memberId) || 0;
+
+    // Gender segmentation
+    const gender = member?.gender?.trim() || "";
+    let genderSegment: CustomerSegment | undefined;
+
+    // Handle numeric encoding: 1 = Male, 2 = Female
+    if (
+      gender === "1" ||
+      gender === "男性" ||
+      gender.toLowerCase() === "male" ||
+      gender === "M"
+    ) {
+      genderSegment = genderSegments.find((s) => s.segment === "Male");
+    } else if (
+      gender === "2" ||
+      gender === "女性" ||
+      gender.toLowerCase() === "female" ||
+      gender === "F"
+    ) {
+      genderSegment = genderSegments.find((s) => s.segment === "Female");
+    } else if (
+      gender &&
+      gender !== "Unknown" &&
+      gender !== "" &&
+      gender !== "1" &&
+      gender !== "2"
+    ) {
+      genderSegment = genderSegments.find((s) => s.segment === "Other");
+    } else {
+      genderSegment = genderSegments.find((s) => s.segment === "Unknown");
+    }
+    if (genderSegment) {
+      genderSegment.count++;
+      genderSegment.totalRevenue += revenue;
+      segmentTransactionCounts.set(
+        genderSegment.segment,
+        (segmentTransactionCounts.get(genderSegment.segment) || 0) +
+          transactionCount
+      );
+    }
+  });
+
+  // Calculate averages and percentages
+  const totalCustomers = customerRevenueMap.size;
+
+  genderSegments.forEach((segment) => {
+    // AOV = Total Revenue / Total Transactions (per order, not per customer)
+    const totalTransactions =
+      segmentTransactionCounts.get(segment.segment) || 0;
+    segment.averageRevenue =
+      totalTransactions > 0 ? segment.totalRevenue / totalTransactions : 0;
+    segment.percentage =
+      totalCustomers > 0 ? (segment.count / totalCustomers) * 100 : 0;
+  });
+
+  // Filter out segments with 0 count
+  return genderSegments.filter((s) => s.count > 0);
 }
 
 // Product Trends Over Time
@@ -1433,6 +1999,110 @@ export function getCollectionPerformanceWithStores(
         .sort((a, b) => b.revenue - a.revenue),
     }))
     .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  return result;
+}
+
+// Color Performance with Store Breakdown
+export function getColorPerformanceWithStores(
+  salesData: SalesRecord[],
+  topN: number = 25
+): PerformanceWithStoreBreakdown[] {
+  // Map: colorName -> Map: storeName -> revenue
+  const colorStoreMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const colorName = sale.colorName || "その他";
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const storeName = sale.storeName.trim();
+
+    if (!colorStoreMap.has(colorName)) {
+      colorStoreMap.set(colorName, {
+        totalRevenue: 0,
+        stores: new Map(),
+      });
+    }
+
+    const colorData = colorStoreMap.get(colorName)!;
+    colorData.totalRevenue += sale.amount;
+    colorData.stores.set(
+      storeName,
+      (colorData.stores.get(storeName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    colorStoreMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([storeName, revenue]) => ({ storeName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+    .slice(0, topN);
+
+  return result;
+}
+
+// Material Performance with Store Breakdown
+export function getMaterialPerformanceWithStores(
+  salesData: SalesRecord[],
+  topN: number = 25
+): PerformanceWithStoreBreakdown[] {
+  // Map: materialName -> Map: storeName -> revenue
+  const materialStoreMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const materialName = sale.materialName || "その他";
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const storeName = sale.storeName.trim();
+
+    if (!materialStoreMap.has(materialName)) {
+      materialStoreMap.set(materialName, {
+        totalRevenue: 0,
+        stores: new Map(),
+      });
+    }
+
+    const materialData = materialStoreMap.get(materialName)!;
+    materialData.totalRevenue += sale.amount;
+    materialData.stores.set(
+      storeName,
+      (materialData.stores.get(storeName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    materialStoreMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([storeName, revenue]) => ({ storeName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+    .slice(0, topN);
 
   return result;
 }

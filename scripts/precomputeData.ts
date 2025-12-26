@@ -201,9 +201,33 @@ function precomputeData() {
     // Day of week
     dayOfWeekData: dataAnalysis.getDayOfWeekAnalysis(filteredData),
 
-    // Product trends
-    productTrends: dataAnalysis.getProductTrends(filteredData, 25, "monthly"),
-    collectionTrends: dataAnalysis.getCollectionTrends(
+    // Product trends (daily, weekly, monthly)
+    productTrendsDaily: dataAnalysis.getProductTrends(
+      filteredData,
+      25,
+      "daily"
+    ),
+    productTrendsWeekly: dataAnalysis.getProductTrends(
+      filteredData,
+      25,
+      "weekly"
+    ),
+    productTrendsMonthly: dataAnalysis.getProductTrends(
+      filteredData,
+      25,
+      "monthly"
+    ),
+    collectionTrendsDaily: dataAnalysis.getCollectionTrends(
+      filteredData,
+      25,
+      "daily"
+    ),
+    collectionTrendsWeekly: dataAnalysis.getCollectionTrends(
+      filteredData,
+      25,
+      "weekly"
+    ),
+    collectionTrendsMonthly: dataAnalysis.getCollectionTrends(
       filteredData,
       25,
       "monthly"
@@ -216,18 +240,33 @@ function precomputeData() {
     ),
     collectionPerformanceWithStores:
       dataAnalysis.getCollectionPerformanceWithStores(filteredData, 25),
+    colorPerformanceWithStores: dataAnalysis.getColorPerformanceWithStores(
+      filteredData,
+      25
+    ),
+    materialPerformanceWithStores:
+      dataAnalysis.getMaterialPerformanceWithStores(filteredData, 25),
 
     // Store performance
     storePerformanceWithProducts: dataAnalysis.getStorePerformanceWithProducts(
       filteredData,
       25
     ),
-    storeTrends: dataAnalysis.getStoreTrends(filteredData, 25, "monthly"),
+    // Store trends (daily, weekly, monthly)
+    storeTrendsDaily: dataAnalysis.getStoreTrends(filteredData, 25, "daily"),
+    storeTrendsWeekly: dataAnalysis.getStoreTrends(filteredData, 25, "weekly"),
+    storeTrendsMonthly: dataAnalysis.getStoreTrends(
+      filteredData,
+      25,
+      "monthly"
+    ),
 
     // Advanced segmentation
     rfmSegments: dataAnalysis.getRFMSegments(filteredData),
+    rfmMatrix: dataAnalysis.getRFMMatrix(filteredData),
     frequencySegments: dataAnalysis.getFrequencySegments(filteredData),
-    recencySegments: dataAnalysis.getRecencySegments(filteredData),
+    ageSegments: dataAnalysis.getAgeSegments(filteredData, memberData),
+    genderSegments: dataAnalysis.getGenderSegments(filteredData, memberData),
     channelSegments: dataAnalysis.getChannelSegments(filteredData),
     aovSegments: dataAnalysis.getAOVSegments(filteredData),
   };

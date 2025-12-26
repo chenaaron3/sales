@@ -1,7 +1,9 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 import { loadPrecomputedData } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
+import { Header } from './Header';
 import { KPIs } from './KPIs';
 import { ProductTab } from './ProductTab';
 import { StoresTab } from './StoresTab';
@@ -73,94 +75,90 @@ export function Dashboard() {
         colorTrends,
         materialTrends,
         customerSegments,
-        productTrends,
-        collectionTrends,
+        productTrendsWeekly,
+        productTrendsMonthly,
+        collectionTrendsWeekly,
+        collectionTrendsMonthly,
         productPerformanceWithStores,
         collectionPerformanceWithStores,
+        colorPerformanceWithStores,
+        materialPerformanceWithStores,
         storePerformanceWithProducts,
-        storeTrends,
-        rfmSegments,
+        storeTrendsWeekly,
+        storeTrendsMonthly,
+        rfmMatrix,
         frequencySegments,
-        recencySegments,
+        ageSegments,
+        genderSegments,
         channelSegments,
         aovSegments,
     } = precomputedData;
 
-    const tabs: { id: TabType; label: string }[] = [
-        { id: 'customers', label: 'Customers' },
-        { id: 'product', label: 'Product' },
-        { id: 'stores', label: 'Stores' },
-        { id: 'temporal', label: 'Time' },
-    ];
-
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                    Sales Dashboard
-                </h1>
+        <div className="min-h-screen bg-background">
+            <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
-                <KPIs metrics={kpis} />
+            <div className="container py-8">
+                <div className="mx-auto">
+                    <KPIs metrics={kpis} />
 
-                {/* Tab Navigation */}
-                <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-                    <nav className="-mb-px flex space-x-8">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                                    }`}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
+                    {/* Tab Content */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="mt-8"
+                        >
+                            {activeTab === 'customers' && (
+                                <CustomersTab
+                                    rfmMatrix={rfmMatrix}
+                                    frequencySegments={frequencySegments}
+                                    ageSegments={ageSegments}
+                                    genderSegments={genderSegments}
+                                    channelSegments={channelSegments}
+                                    aovSegments={aovSegments}
+                                    lifetimeValueSegments={customerSegments}
+                                />
+                            )}
 
-                {/* Tab Content */}
-                <div className="mt-6">
-                    {activeTab === 'customers' && (
-                        <CustomersTab
-                            rfmSegments={rfmSegments}
-                            frequencySegments={frequencySegments}
-                            recencySegments={recencySegments}
-                            channelSegments={channelSegments}
-                            aovSegments={aovSegments}
-                            lifetimeValueSegments={customerSegments}
-                        />
-                    )}
+                            {activeTab === 'product' && (
+                                <ProductTab
+                                    productTrendsWeekly={productTrendsWeekly}
+                                    productTrendsMonthly={productTrendsMonthly}
+                                    collectionTrendsWeekly={collectionTrendsWeekly}
+                                    collectionTrendsMonthly={collectionTrendsMonthly}
+                                    productPerformanceWithStores={productPerformanceWithStores}
+                                    collectionPerformanceWithStores={collectionPerformanceWithStores}
+                                    colorPerformanceWithStores={colorPerformanceWithStores}
+                                    materialPerformanceWithStores={materialPerformanceWithStores}
+                                    colorTrends={colorTrends}
+                                    materialTrends={materialTrends}
+                                />
+                            )}
 
-                    {activeTab === 'product' && (
-                        <ProductTab
-                            productTrends={productTrends}
-                            collectionTrends={collectionTrends}
-                            productPerformanceWithStores={productPerformanceWithStores}
-                            collectionPerformanceWithStores={collectionPerformanceWithStores}
-                            colorTrends={colorTrends}
-                            materialTrends={materialTrends}
-                        />
-                    )}
+                            {activeTab === 'temporal' && (
+                                <TemporalTab
+                                    birthdayDataCustomer={birthdayDataCustomer}
+                                    birthdayDataImportantPerson={birthdayDataImportantPerson}
+                                    dayOfWeekData={dayOfWeekData}
+                                    trendDataDaily={trendDataDaily}
+                                    trendDataWeekly={trendDataWeekly}
+                                    trendDataMonthly={trendDataMonthly}
+                                />
+                            )}
 
-                    {activeTab === 'temporal' && (
-                        <TemporalTab
-                            birthdayDataCustomer={birthdayDataCustomer}
-                            birthdayDataImportantPerson={birthdayDataImportantPerson}
-                            dayOfWeekData={dayOfWeekData}
-                            trendDataDaily={trendDataDaily}
-                            trendDataWeekly={trendDataWeekly}
-                            trendDataMonthly={trendDataMonthly}
-                        />
-                    )}
-
-                    {activeTab === 'stores' && (
-                        <StoresTab
-                            storePerformanceWithProducts={storePerformanceWithProducts}
-                            storeTrends={storeTrends}
-                        />
-                    )}
+                            {activeTab === 'stores' && (
+                                <StoresTab
+                                    storePerformanceWithProducts={storePerformanceWithProducts}
+                                    storeTrendsWeekly={storeTrendsWeekly}
+                                    storeTrendsMonthly={storeTrendsMonthly}
+                                />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

@@ -9,15 +9,25 @@ export interface PrecomputedData {
   colorTrends: any[];
   materialTrends: any[];
   customerSegments: any[];
-  productTrends: any[];
-  collectionTrends: any[];
+  productTrendsDaily: any[];
+  productTrendsWeekly: any[];
+  productTrendsMonthly: any[];
+  collectionTrendsDaily: any[];
+  collectionTrendsWeekly: any[];
+  collectionTrendsMonthly: any[];
   productPerformanceWithStores: any[];
   collectionPerformanceWithStores: any[];
+  colorPerformanceWithStores: any[];
+  materialPerformanceWithStores: any[];
   storePerformanceWithProducts: any[];
-  storeTrends: any[];
+  storeTrendsDaily: any[];
+  storeTrendsWeekly: any[];
+  storeTrendsMonthly: any[];
   rfmSegments: any[];
+  rfmMatrix: any[];
   frequencySegments: any[];
-  recencySegments: any[];
+  ageSegments: any[];
+  genderSegments: any[];
   channelSegments: any[];
   aovSegments: any[];
 }
@@ -47,7 +57,7 @@ export async function loadPrecomputedData(): Promise<PrecomputedData> {
   const data = (await response.json()) as PrecomputedData;
 
   // Verify we got valid precomputed data
-  if (!data.kpis || !data.trendDataMonthly || !data.productTrends) {
+  if (!data.kpis || !data.trendDataMonthly || !data.productTrendsMonthly) {
     throw new Error(
       'Invalid precomputed data format. Please regenerate with "npm run precompute"'
     );
@@ -56,7 +66,7 @@ export async function loadPrecomputedData(): Promise<PrecomputedData> {
   console.log("✅ Precomputed data loaded successfully:", {
     kpis: !!data.kpis,
     trends: data.trendDataMonthly?.length || 0,
-    productTrends: data.productTrends?.length || 0,
+    productTrends: data.productTrendsMonthly?.length || 0,
     totalKeys: Object.keys(data).length,
   });
 
