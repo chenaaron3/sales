@@ -3,8 +3,6 @@
 
 import type {
   SalesRecord,
-  MemberRecord,
-  Granularity,
   AcquisitionMetrics,
   FirstPurchaseAnalysis,
   PurchaseInterval,
@@ -16,10 +14,9 @@ import type {
   LTVAnalysis,
   ChurnMetrics,
   PurchaseCycleSegment,
-  CustomerDetail,
-  CustomerSegment,
 } from "../types";
-import { getCustomerDetails, getCustomerSegments, getDateKey } from './dataAnalysis';
+import type { Granularity } from "./dataAnalysis";
+import { getCustomerDetails, getDateKey } from './dataAnalysis';
 
 // 1. Acquisition Metrics
 export function getAcquisitionMetrics(
@@ -96,8 +93,7 @@ export function getAcquisitionMetrics(
 
 // 2. First Purchase Analysis
 export function getFirstPurchaseAnalysis(
-  salesData: SalesRecord[],
-  memberData: MemberRecord[]
+  salesData: SalesRecord[]
 ): FirstPurchaseAnalysis {
   const customerDetails = getCustomerDetails(salesData);
   const firstPurchases = new Map<string, SalesRecord>();
@@ -259,7 +255,7 @@ export function getPurchaseCycleSegments(
   salesData: SalesRecord[]
 ): PurchaseCycleSegment[] {
   const customerDetails = getCustomerDetails(salesData);
-  const segments: PurchaseCycleSegment[] = [
+  const cycleSegments: PurchaseCycleSegment[] = [
     {
       segment: "Very Regular (0-30 days)",
       count: 0,
@@ -295,26 +291,26 @@ export function getPurchaseCycleSegments(
     const revenue = customer?.totalRevenue || 0;
 
     if (interval.averageInterval <= 30) {
-      segments[0].count++;
-      segments[0].averageInterval += interval.averageInterval;
-      segments[0].averageRevenue += revenue;
+      cycleSegments[0].count++;
+      cycleSegments[0].averageInterval += interval.averageInterval;
+      cycleSegments[0].averageRevenue += revenue;
     } else if (interval.averageInterval <= 90) {
-      segments[1].count++;
-      segments[1].averageInterval += interval.averageInterval;
-      segments[1].averageRevenue += revenue;
+      cycleSegments[1].count++;
+      cycleSegments[1].averageInterval += interval.averageInterval;
+      cycleSegments[1].averageRevenue += revenue;
     } else if (interval.averageInterval <= 180) {
-      segments[2].count++;
-      segments[2].averageInterval += interval.averageInterval;
-      segments[2].averageRevenue += revenue;
+      cycleSegments[2].count++;
+      cycleSegments[2].averageInterval += interval.averageInterval;
+      cycleSegments[2].averageRevenue += revenue;
     } else {
-      segments[3].count++;
-      segments[3].averageInterval += interval.averageInterval;
-      segments[3].averageRevenue += revenue;
+      cycleSegments[3].count++;
+      cycleSegments[3].averageInterval += interval.averageInterval;
+      cycleSegments[3].averageRevenue += revenue;
     }
   });
 
   const total = intervals.length;
-  segments.forEach((segment) => {
+  cycleSegments.forEach((segment) => {
     segment.averageInterval =
       segment.count > 0 ? segment.averageInterval / segment.count : 0;
     segment.averageRevenue =
@@ -322,7 +318,7 @@ export function getPurchaseCycleSegments(
     segment.percentage = total > 0 ? (segment.count / total) * 100 : 0;
   });
 
-  return segments;
+  return cycleSegments;
 }
 
 // 4. First vs Repeat Purchase Analysis
@@ -358,7 +354,7 @@ export function getFirstRepeatAnalysis(
   let totalDaysToSecond = 0;
   const categoryMap = new Map<string, { first: number; repeat: number }>();
 
-  customerPurchases.forEach((purchases, customerId) => {
+  customerPurchases.forEach((purchases) => {
     if (purchases.first.length > 0) {
       const firstValue = purchases.first.reduce((sum, s) => sum + s.amount, 0);
       totalFirstPurchaseValue += firstValue;
@@ -507,8 +503,6 @@ export function getProductAffinity(
     if (pair.coOccurrence >= minSupport) {
       const supportA =
         (productCount.get(pair.productA) || 0) / totalTransactions;
-      const supportB =
-        (productCount.get(pair.productB) || 0) / totalTransactions;
       const supportPair = pair.coOccurrence / totalTransactions;
       const confidence = supportA > 0 ? supportPair / supportA : 0;
 
@@ -650,7 +644,6 @@ export function getLTVAnalysis(
   >();
 
   // Get segment assignments
-  const segments = getCustomerSegments(salesData);
   const segmentMap = new Map<string, string>();
   customerDetails.forEach((customer) => {
     let segment = "Occasional";

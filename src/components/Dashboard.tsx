@@ -112,7 +112,7 @@ export function Dashboard() {
 
     // Funnel analysis
     const acquisitionMetrics = getAcquisitionMetrics(filteredData, 'monthly');
-    const firstPurchaseAnalysis = getFirstPurchaseAnalysis(filteredData, memberData);
+    const firstPurchaseAnalysis = getFirstPurchaseAnalysis(filteredData);
     const purchaseIntervals = getPurchaseIntervals(filteredData);
     const intervalDistribution = getPurchaseIntervalDistribution(purchaseIntervals);
     const cycleSegments = getPurchaseCycleSegments(purchaseIntervals, filteredData);
