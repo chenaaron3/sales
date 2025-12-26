@@ -1,6 +1,6 @@
-# Sales Dashboard - Customer Behavior Analysis
+# Jouete Sales Dashboard
 
-A comprehensive React-based dashboard for analyzing customer behavior and sales data from an online jewelry store (Jouete). This dashboard provides deep insights into customer buying patterns, product performance, store operations, and segmentation strategies to help increase sales.
+A comprehensive React-based dashboard for analyzing customer behavior and sales data from an online jewelry store (Jouete). This dashboard provides deep insights into customer buying patterns, product performance, store operations, employee performance, and segmentation strategies to help increase sales.
 
 ## 📋 Table of Contents
 
@@ -21,6 +21,7 @@ This dashboard is designed to answer key business questions:
 - **Customer Behavior**: How do customers buy? What patterns can we identify?
 - **Product Performance**: Which products drive revenue? What are the trends?
 - **Store Performance**: How do different stores compare? Online vs brick-and-mortar?
+- **Employee Performance**: Which employees drive the most sales? What products do they sell?
 - **Customer Segmentation**: How can we segment customers for targeted marketing?
 - **Birthday Correlation**: Is there a correlation between birthdays and sales?
 - **Temporal Patterns**: When do customers buy? What days are busiest?
@@ -30,10 +31,11 @@ This dashboard is designed to answer key business questions:
 ### Core Dashboard
 
 - **KPI Cards**: Total revenue, transactions, average order value, and active customers
-- **Tab-Based Navigation**: Four main analysis sections:
+- **Tab-Based Navigation**: Five main analysis sections:
   - **Customers (Who)**: Customer segmentation and behavior analysis
   - **Product (What)**: Product and collection performance with store breakdowns
   - **Stores (Where)**: Store performance with product breakdowns
+  - **Employees**: Employee sales performance with product breakdowns, filtering, and pagination
   - **Time (When)**: Temporal patterns, birthday correlations, and trends
 - **Build-Time Precomputation**: All analysis data is precomputed at build time for lightning-fast load times
 
@@ -44,6 +46,10 @@ This dashboard is designed to answer key business questions:
 3. **Product Trends**: Top 25 products/collections trends over time
 4. **Store Performance**: Top 25 stores with product breakdowns (stacked bar charts)
 5. **Store Trends**: Top 25 stores trends over time
+6. **Employee Performance**: All employees with product breakdowns (stacked bar charts)
+   - Filter by store
+   - Pagination (10 employees per page)
+   - Top 10 products per employee, with "Others" category for remaining products
 
 ### Customer Insights
 
@@ -135,6 +141,8 @@ Contains one year of sales transaction data with the following key fields:
 - `金額` (Amount)
 - `店舗名` (Store Name)
 - `店舗コード` (Store Code)
+- `担当者名` (Staff Name)
+- `担当者コード` (Staff Code)
 - `商品分類名` (Product Category Name)
 - `アイテム名` (Item Name) - e.g., リング (Ring), ネックレス (Necklace)
 - `素材名` (Material Name)
@@ -167,6 +175,7 @@ Contains customer/member information:
 - **`CustomersTab.tsx`**: Customer segmentation and behavior analysis
 - **`ProductTab.tsx`**: Product and collection performance with trends
 - **`StoresTab.tsx`**: Store performance with trends
+- **`EmployeesTab.tsx`**: Employee sales performance with filtering and pagination
 - **`TemporalTab.tsx`**: Time-based analysis including birthday correlations
 
 ### Visualization Components
@@ -177,6 +186,7 @@ Contains customer/member information:
 - **`ProductTrendsChart.tsx`**: Line chart showing top 25 products/collections trends over time
 - **`StorePerformance.tsx`**: Stacked horizontal bar chart of top 25 stores by product
 - **`StoreTrendsChart.tsx`**: Line chart showing top 25 stores trends over time
+- **`EmployeePerformanceChart.tsx`**: Stacked horizontal bar chart of all employees with product breakdowns
 - **`AttributeTrends.tsx`**: Line chart showing color/material trends over time
 - **`AdvancedCustomerSegmentation.tsx`**: Comprehensive customer segmentation with multiple dimensions
 - **`DayOfWeekAnalysis.tsx`**: Bar chart showing sales patterns by day of week
@@ -213,7 +223,14 @@ Contains customer/member information:
    - `getStoreTrends()`: Store trends over time
    - `getStorePerformanceWithProducts()`: Store performance broken down by product
 
-5. **Customer Segmentation**:
+5. **Employee Analysis**:
+
+   - `getEmployeePerformance()`: Employee sales performance with product breakdowns and store associations
+     - Returns all employees (no limit)
+     - Includes store information for each employee
+     - Tracks top products sold by each employee
+
+6. **Customer Segmentation**:
 
    - `getCustomerDetails()`: Comprehensive customer profile with purchase history
    - `getRFMSegments()`: RFM (Recency, Frequency, Monetary) analysis
@@ -223,17 +240,17 @@ Contains customer/member information:
    - `getAOVSegments()`: Segments by average order value
    - `getCustomerSegments()`: Segments by lifetime value
 
-6. **Temporal Analysis**:
+7. **Temporal Analysis**:
 
    - `getDayOfWeekAnalysis()`: Sales patterns by day of week
 
-7. **Birthday Analysis**:
+8. **Birthday Analysis**:
 
    - `getBirthdaySalesCorrelation()`: Analyzes sales correlation with birthdays
    - Handles year boundaries for accurate day-from-birthday calculations
    - Supports both customer's own birthday and important person's birthday
 
-8. **Data Filtering**:
+9. **Data Filtering**:
    - `filterSalesData()`: Filters sales data by date range, categories, and stores
 
 ### Data Loading
@@ -271,12 +288,14 @@ sales/
 │   │   ├── CustomersTab.tsx         # Customer analysis tab
 │   │   ├── ProductTab.tsx            # Product analysis tab
 │   │   ├── StoresTab.tsx             # Store analysis tab
+│   │   ├── EmployeesTab.tsx          # Employee analysis tab
 │   │   ├── TemporalTab.tsx           # Time analysis tab
 │   │   ├── AdvancedCustomerSegmentation.tsx
 │   │   ├── AttributeTrends.tsx
 │   │   ├── BirthdayHeatMap.tsx
 │   │   ├── Dashboard.tsx
 │   │   ├── DayOfWeekAnalysis.tsx
+│   │   ├── EmployeePerformanceChart.tsx
 │   │   ├── KPICard.tsx
 │   │   ├── KPIs.tsx
 │   │   ├── ProductPerformance.tsx
@@ -350,16 +369,26 @@ The Advanced Customer Segmentation component allows you to switch between differ
   - View store trends over time
 - **Attribute Trends**: Switch between Color and Material views to see attribute popularity over time
 
+### Employee Analysis
+
+- **Employee Performance**: View all employees with product breakdowns (stacked bars)
+  - Filter employees by store using the dropdown selector
+  - Paginate through employees (10 per page)
+  - Each employee shows top 10 products individually, with remaining products grouped as "Others"
+  - Hover over bars to see detailed product breakdown in sidebar
+  - All revenue is captured (top 10 products + Others = total revenue)
+
 ## 💡 Key Insights Provided
 
 1. **Customer Lifetime Value**: Identify VIP customers and high-value segments
 2. **At-Risk Customers**: Customers who haven't purchased recently but were valuable
 3. **Product Winners**: Top-performing products to focus marketing efforts
 4. **Store Performance**: Identify best-performing locations and opportunities
-5. **Temporal Patterns**: Understand when customers are most active
-6. **Channel Preferences**: Optimize online vs. brick-and-mortar strategies
-7. **Birthday Marketing**: Identify optimal timing for birthday promotions
-8. **Product Trends**: Track popularity of colors and materials over time
+5. **Employee Performance**: Identify top-performing sales staff and their product expertise
+6. **Temporal Patterns**: Understand when customers are most active
+7. **Channel Preferences**: Optimize online vs. brick-and-mortar strategies
+8. **Birthday Marketing**: Identify optimal timing for birthday promotions
+9. **Product Trends**: Track popularity of colors and materials over time
 
 ## 🔧 Data Processing Notes
 
