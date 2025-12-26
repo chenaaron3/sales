@@ -183,6 +183,13 @@ function precomputeData() {
       "importantPerson"
     ),
 
+    // Anniversary sales correlation
+    anniversaryData: dataAnalysis.getAnniversarySalesCorrelation(
+      filteredData,
+      memberData,
+      30
+    ),
+
     // Attribute trends
     colorTrends: dataAnalysis.getAttributeTrends(
       filteredData,
@@ -232,6 +239,16 @@ function precomputeData() {
       25,
       "monthly"
     ),
+    categoryTrendsWeekly: dataAnalysis.getCategoryTrends(
+      filteredData,
+      25,
+      "weekly"
+    ),
+    categoryTrendsMonthly: dataAnalysis.getCategoryTrends(
+      filteredData,
+      25,
+      "monthly"
+    ),
 
     // Product performance with stores
     productPerformanceWithStores: dataAnalysis.getProductPerformanceWithStores(
@@ -240,6 +257,8 @@ function precomputeData() {
     ),
     collectionPerformanceWithStores:
       dataAnalysis.getCollectionPerformanceWithStores(filteredData, 25),
+    categoryPerformanceWithStores:
+      dataAnalysis.getCategoryPerformanceWithStores(filteredData, 25),
     colorPerformanceWithStores: dataAnalysis.getColorPerformanceWithStores(
       filteredData,
       25

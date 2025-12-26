@@ -9,15 +9,18 @@ import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 import type { AttributeTrend, PerformanceWithStoreBreakdown, ProductTrend, CollectionTrend } from '../types';
 import type { Granularity } from '../utils/dataAnalysis';
 
-type ViewType = 'product' | 'collection' | 'color' | 'material';
+type ViewType = 'product' | 'collection' | 'category' | 'color' | 'material';
 
 interface ProductTabProps {
     productTrendsWeekly: ProductTrend[];
     productTrendsMonthly: ProductTrend[];
     collectionTrendsWeekly: CollectionTrend[];
     collectionTrendsMonthly: CollectionTrend[];
+    categoryTrendsWeekly: CollectionTrend[];
+    categoryTrendsMonthly: CollectionTrend[];
     productPerformanceWithStores: PerformanceWithStoreBreakdown[];
     collectionPerformanceWithStores: PerformanceWithStoreBreakdown[];
+    categoryPerformanceWithStores: PerformanceWithStoreBreakdown[];
     colorPerformanceWithStores: PerformanceWithStoreBreakdown[];
     materialPerformanceWithStores: PerformanceWithStoreBreakdown[];
     colorTrends: AttributeTrend[];
@@ -29,8 +32,11 @@ export function ProductTab({
     productTrendsMonthly,
     collectionTrendsWeekly,
     collectionTrendsMonthly,
+    categoryTrendsWeekly,
+    categoryTrendsMonthly,
     productPerformanceWithStores,
     collectionPerformanceWithStores,
+    categoryPerformanceWithStores,
     colorPerformanceWithStores,
     materialPerformanceWithStores,
     colorTrends,
@@ -42,6 +48,7 @@ export function ProductTab({
     const viewTypeLabels: Record<ViewType, string> = {
         product: 'Product',
         collection: 'Collection',
+        category: 'Category',
         color: 'Color',
         material: 'Material',
     };
@@ -51,9 +58,11 @@ export function ProductTab({
         ? productPerformanceWithStores
         : viewType === 'collection'
             ? collectionPerformanceWithStores
-            : viewType === 'color'
-                ? colorPerformanceWithStores
-                : materialPerformanceWithStores;
+            : viewType === 'category'
+                ? categoryPerformanceWithStores
+                : viewType === 'color'
+                    ? colorPerformanceWithStores
+                    : materialPerformanceWithStores;
 
     // Get trends data based on view type and granularity
     const getTrendsData = () => {
@@ -65,6 +74,10 @@ export function ProductTab({
             return granularity === 'weekly'
                 ? collectionTrendsWeekly
                 : collectionTrendsMonthly;
+        } else if (viewType === 'category') {
+            return granularity === 'weekly'
+                ? categoryTrendsWeekly
+                : categoryTrendsMonthly;
         } else {
             return viewType === 'color' ? colorTrends : materialTrends;
         }
@@ -88,7 +101,7 @@ export function ProductTab({
                                 value={viewType}
                                 onValueChange={(value) => value && setViewType(value as ViewType)}
                             >
-                                {(['product', 'collection', 'color', 'material'] as ViewType[]).map((type) => (
+                                {(['product', 'collection', 'category', 'color', 'material'] as ViewType[]).map((type) => (
                                     <ToggleGroupItem
                                         key={type}
                                         value={type}
@@ -104,7 +117,7 @@ export function ProductTab({
                 <CardContent>
                     <ProductPerformanceChart
                         data={performanceData}
-                        viewType={viewType === 'product' ? 'product' : viewType === 'collection' ? 'collection' : 'product'}
+                        viewType={viewType === 'product' ? 'product' : viewType === 'collection' ? 'collection' : viewType === 'category' ? 'collection' : 'product'}
                     />
                 </CardContent>
             </Card>

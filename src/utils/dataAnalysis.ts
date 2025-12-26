@@ -436,6 +436,116 @@ export function getBirthdaySalesCorrelation(
   return result;
 }
 
+export function getAnniversarySalesCorrelation(
+  salesData: SalesRecord[],
+  memberData: MemberRecord[],
+  daysRange: number = 30
+): BirthdaySalesData[] {
+  // Create a map of memberId to anniversary date
+  const memberAnniversaryMap = new Map<string, string>();
+  memberData.forEach((member) => {
+    if (member.memberId && member.anniversary) {
+      memberAnniversaryMap.set(member.memberId, member.anniversary);
+    }
+  });
+
+  // Initialize buckets for each day from -daysRange to +daysRange
+  const buckets = new Map<
+    number,
+    { salesCount: number; revenue: number; transactions: Set<string> }
+  >();
+  for (let i = -daysRange; i <= daysRange; i++) {
+    buckets.set(i, { salesCount: 0, revenue: 0, transactions: new Set() });
+  }
+
+  salesData.forEach((sale) => {
+    const memberId = sale.memberId;
+    const anniversaryStr = memberAnniversaryMap.get(memberId);
+    if (!anniversaryStr || !sale.purchaseDate) return;
+
+    // Parse dates
+    const anniversaryMatch = anniversaryStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const purchaseDateMatch = sale.purchaseDate.match(
+      /^(\d{4})-(\d{2})-(\d{2})/
+    );
+    if (!anniversaryMatch || !purchaseDateMatch) return;
+
+    const anniversaryDate = new Date(
+      parseInt(anniversaryMatch[1]),
+      parseInt(anniversaryMatch[2]) - 1,
+      parseInt(anniversaryMatch[3])
+    );
+    const purchaseDate = new Date(
+      parseInt(purchaseDateMatch[1]),
+      parseInt(purchaseDateMatch[2]) - 1,
+      parseInt(purchaseDateMatch[3])
+    );
+
+    // Calculate days from anniversary - check current year, previous year, and next year
+    // to find the closest anniversary
+    const currentYear = purchaseDate.getFullYear();
+    const thisYearAnniversary = new Date(
+      currentYear,
+      anniversaryDate.getMonth(),
+      anniversaryDate.getDate()
+    );
+    const prevYearAnniversary = new Date(
+      currentYear - 1,
+      anniversaryDate.getMonth(),
+      anniversaryDate.getDate()
+    );
+    const nextYearAnniversary = new Date(
+      currentYear + 1,
+      anniversaryDate.getMonth(),
+      anniversaryDate.getDate()
+    );
+
+    const daysDiffThis = Math.floor(
+      (purchaseDate.getTime() - thisYearAnniversary.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    const daysDiffPrev = Math.floor(
+      (purchaseDate.getTime() - prevYearAnniversary.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    const daysDiffNext = Math.floor(
+      (purchaseDate.getTime() - nextYearAnniversary.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+
+    // Find the closest anniversary
+    let daysDiff = daysDiffThis;
+    if (Math.abs(daysDiffPrev) < Math.abs(daysDiff)) {
+      daysDiff = daysDiffPrev;
+    }
+    if (Math.abs(daysDiffNext) < Math.abs(daysDiff)) {
+      daysDiff = daysDiffNext;
+    }
+
+    // Only include if within range
+    if (daysDiff >= -daysRange && daysDiff <= daysRange) {
+      const bucket = buckets.get(daysDiff);
+      if (bucket) {
+        bucket.salesCount += sale.quantity;
+        bucket.revenue += sale.amount;
+        bucket.transactions.add(sale.transactionNumber);
+      }
+    }
+  });
+
+  // Convert to array format
+  const result: BirthdaySalesData[] = Array.from(buckets.entries())
+    .map(([daysFromAnniversary, data]) => ({
+      daysFromBirthday: daysFromAnniversary, // Reusing the same interface
+      salesCount: data.salesCount,
+      revenue: data.revenue,
+      transactions: data.transactions.size,
+    }))
+    .sort((a, b) => a.daysFromBirthday - b.daysFromBirthday);
+
+  return result;
+}
+
 // 1. Product Performance Analysis
 export function getTopProducts(
   salesData: SalesRecord[],
@@ -2007,6 +2117,102 @@ export function getProductPerformanceWithStores(
   return result;
 }
 
+// Product Category Performance with Store Breakdown
+export function getCategoryPerformanceWithStores(
+  salesData: SalesRecord[],
+  topN: number = 25
+): PerformanceWithStoreBreakdown[] {
+  // Get top categories
+  const categoryPerformanceMap = new Map<
+    string,
+    {
+      revenue: number;
+      quantity: number;
+      transactions: Set<string>;
+      products: Set<string>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+    const categoryName = sale.productCategoryName || "その他";
+
+    if (!categoryPerformanceMap.has(categoryName)) {
+      categoryPerformanceMap.set(categoryName, {
+        revenue: 0,
+        quantity: 0,
+        transactions: new Set(),
+        products: new Set(),
+      });
+    }
+
+    const perf = categoryPerformanceMap.get(categoryName)!;
+    perf.revenue += sale.amount;
+    perf.quantity += sale.quantity;
+    perf.transactions.add(sale.transactionNumber);
+    perf.products.add(sale.productName || sale.productCode);
+  });
+
+  const topCategories = Array.from(categoryPerformanceMap.entries())
+    .map(([name, data]) => ({
+      name,
+      revenue: data.revenue,
+      quantity: data.quantity,
+      transactions: data.transactions.size,
+      products: data.products.size,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, topN);
+
+  const topCategoryNames = new Set(topCategories.map((c) => c.name));
+
+  // Map: categoryName -> Map: storeName -> revenue
+  const categoryStoreMap = new Map<
+    string,
+    {
+      totalRevenue: number;
+      stores: Map<string, number>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    const categoryName = sale.productCategoryName || "その他";
+    if (!topCategoryNames.has(categoryName)) return;
+    if (!sale.storeName || sale.storeName.trim() === "") return;
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+
+    const storeName = sale.storeName.trim();
+
+    if (!categoryStoreMap.has(categoryName)) {
+      categoryStoreMap.set(categoryName, {
+        totalRevenue: 0,
+        stores: new Map(),
+      });
+    }
+
+    const categoryData = categoryStoreMap.get(categoryName)!;
+    categoryData.totalRevenue += sale.amount;
+    categoryData.stores.set(
+      storeName,
+      (categoryData.stores.get(storeName) || 0) + sale.amount
+    );
+  });
+
+  const result: PerformanceWithStoreBreakdown[] = Array.from(
+    categoryStoreMap.entries()
+  )
+    .map(([name, data]) => ({
+      name,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores.entries())
+        .map(([storeName, revenue]) => ({ storeName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  return result;
+}
+
 // Collection Performance with Store Breakdown
 export function getCollectionPerformanceWithStores(
   salesData: SalesRecord[],
@@ -2222,6 +2428,105 @@ export function getCollectionTrends(
 
     topCollectionNames.forEach((collectionName) => {
       entry[collectionName] = periodMap.get(collectionName) || 0;
+    });
+
+    result.push(entry);
+  });
+
+  return result;
+}
+
+// Category Trends Over Time
+export function getCategoryTrends(
+  salesData: SalesRecord[],
+  topN: number = 25,
+  granularity: Granularity = "monthly"
+): CollectionTrend[] {
+  // Get top categories
+  const categoryPerformanceMap = new Map<
+    string,
+    {
+      revenue: number;
+      quantity: number;
+      transactions: Set<string>;
+      products: Set<string>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+    const categoryName = sale.productCategoryName || "その他";
+
+    if (!categoryPerformanceMap.has(categoryName)) {
+      categoryPerformanceMap.set(categoryName, {
+        revenue: 0,
+        quantity: 0,
+        transactions: new Set(),
+        products: new Set(),
+      });
+    }
+
+    const perf = categoryPerformanceMap.get(categoryName)!;
+    perf.revenue += sale.amount;
+    perf.quantity += sale.quantity;
+    perf.transactions.add(sale.transactionNumber);
+    perf.products.add(sale.productName || sale.productCode);
+  });
+
+  const topCategories = Array.from(categoryPerformanceMap.entries())
+    .map(([name, data]) => ({
+      name,
+      revenue: data.revenue,
+      quantity: data.quantity,
+      transactions: data.transactions.size,
+      products: data.products.size,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, topN);
+
+  const topCategoryNames = new Set(topCategories.map((c) => c.name));
+
+  // Group by period and category
+  const trendMap = new Map<string, Map<string, number>>();
+
+  salesData.forEach((record) => {
+    const categoryName = record.productCategoryName || "その他";
+    if (!topCategoryNames.has(categoryName)) return;
+    if (record.transactionType !== "売上" || record.amount <= 0) return;
+
+    const dateStr = record.purchaseDate;
+    if (!dateStr) return;
+
+    const dateMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!dateMatch) return;
+
+    const year = parseInt(dateMatch[1]);
+    const month = parseInt(dateMatch[2]) - 1;
+    const day = parseInt(dateMatch[3]);
+    const date = new Date(year, month, day);
+    const periodKey = getDateKey(date, granularity);
+
+    if (!trendMap.has(periodKey)) {
+      trendMap.set(periodKey, new Map());
+    }
+
+    const periodMap = trendMap.get(periodKey)!;
+    periodMap.set(
+      categoryName,
+      (periodMap.get(categoryName) || 0) + record.amount
+    );
+  });
+
+  // Convert to array format
+  const result: CollectionTrend[] = [];
+  const sortedDates = Array.from(trendMap.keys()).sort();
+
+  sortedDates.forEach((date) => {
+    const periodMap = trendMap.get(date)!;
+    const entry: CollectionTrend = { date };
+
+    topCategoryNames.forEach((categoryName) => {
+      entry[categoryName] = periodMap.get(categoryName) || 0;
     });
 
     result.push(entry);

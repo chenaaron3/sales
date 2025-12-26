@@ -1,17 +1,18 @@
 import { useState } from 'react';
 
-import { BirthdayHeatMap } from './BirthdayHeatMap';
 import { DayOfWeekAnalysisChart } from './DayOfWeekAnalysis';
+import { SpecialDayHeatMap } from './SpecialDayHeatMap';
 import { TrendChart } from './TrendChart';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 import type { BirthdaySalesData, DayOfWeekData, TimeSeriesData } from '../types';
-import type { BirthdayType, Granularity } from '../utils/dataAnalysis';
+import type { Granularity } from '../utils/dataAnalysis';
 
 interface TemporalTabProps {
     birthdayDataCustomer: BirthdaySalesData[];
     birthdayDataImportantPerson: BirthdaySalesData[];
+    anniversaryData: BirthdaySalesData[];
     dayOfWeekData: DayOfWeekData[];
     trendDataDaily: TimeSeriesData[];
     trendDataWeekly: TimeSeriesData[];
@@ -21,17 +22,13 @@ interface TemporalTabProps {
 export function TemporalTab({
     birthdayDataCustomer,
     birthdayDataImportantPerson,
+    anniversaryData,
     dayOfWeekData,
     trendDataDaily,
     trendDataWeekly,
     trendDataMonthly,
 }: TemporalTabProps) {
-    const [birthdayType, setBirthdayType] = useState<BirthdayType>('importantPerson');
     const [granularity, setGranularity] = useState<Granularity>('monthly');
-
-    const birthdayData = birthdayType === 'customer'
-        ? birthdayDataCustomer
-        : birthdayDataImportantPerson;
 
     const trendData = granularity === 'daily'
         ? trendDataDaily
@@ -41,11 +38,11 @@ export function TemporalTab({
 
     return (
         <div className="space-y-8">
-            <BirthdayHeatMap
-                data={birthdayData}
+            <SpecialDayHeatMap
+                birthdayDataCustomer={birthdayDataCustomer}
+                birthdayDataImportantPerson={birthdayDataImportantPerson}
+                anniversaryData={anniversaryData}
                 metric="revenue"
-                birthdayType={birthdayType}
-                onBirthdayTypeChange={setBirthdayType}
             />
 
             <DayOfWeekAnalysisChart data={dayOfWeekData} metric="revenue" />

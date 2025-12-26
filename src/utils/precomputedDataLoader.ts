@@ -5,6 +5,7 @@ export interface PrecomputedData {
   trendDataMonthly: any[];
   birthdayDataCustomer: any[];
   birthdayDataImportantPerson: any[];
+  anniversaryData: any[];
   dayOfWeekData: any[];
   colorTrends: any[];
   materialTrends: any[];
@@ -15,8 +16,11 @@ export interface PrecomputedData {
   collectionTrendsDaily: any[];
   collectionTrendsWeekly: any[];
   collectionTrendsMonthly: any[];
+  categoryTrendsWeekly: any[];
+  categoryTrendsMonthly: any[];
   productPerformanceWithStores: any[];
   collectionPerformanceWithStores: any[];
+  categoryPerformanceWithStores: any[];
   colorPerformanceWithStores: any[];
   materialPerformanceWithStores: any[];
   storePerformanceWithProducts: any[];

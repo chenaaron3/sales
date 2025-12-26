@@ -72,6 +72,7 @@ export function Dashboard() {
         trendDataMonthly,
         birthdayDataCustomer,
         birthdayDataImportantPerson,
+        anniversaryData,
         dayOfWeekData,
         colorTrends,
         materialTrends,
@@ -80,8 +81,11 @@ export function Dashboard() {
         productTrendsMonthly,
         collectionTrendsWeekly,
         collectionTrendsMonthly,
+        categoryTrendsWeekly,
+        categoryTrendsMonthly,
         productPerformanceWithStores,
         collectionPerformanceWithStores,
+        categoryPerformanceWithStores,
         colorPerformanceWithStores,
         materialPerformanceWithStores,
         storePerformanceWithProducts,
@@ -132,8 +136,11 @@ export function Dashboard() {
                                     productTrendsMonthly={productTrendsMonthly}
                                     collectionTrendsWeekly={collectionTrendsWeekly}
                                     collectionTrendsMonthly={collectionTrendsMonthly}
+                                    categoryTrendsWeekly={categoryTrendsWeekly}
+                                    categoryTrendsMonthly={categoryTrendsMonthly}
                                     productPerformanceWithStores={productPerformanceWithStores}
                                     collectionPerformanceWithStores={collectionPerformanceWithStores}
+                                    categoryPerformanceWithStores={categoryPerformanceWithStores}
                                     colorPerformanceWithStores={colorPerformanceWithStores}
                                     materialPerformanceWithStores={materialPerformanceWithStores}
                                     colorTrends={colorTrends}
@@ -145,6 +152,7 @@ export function Dashboard() {
                                 <TemporalTab
                                     birthdayDataCustomer={birthdayDataCustomer}
                                     birthdayDataImportantPerson={birthdayDataImportantPerson}
+                                    anniversaryData={anniversaryData}
                                     dayOfWeekData={dayOfWeekData}
                                     trendDataDaily={trendDataDaily}
                                     trendDataWeekly={trendDataWeekly}
