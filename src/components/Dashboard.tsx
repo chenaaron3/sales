@@ -10,11 +10,11 @@ import { ProductTab } from './ProductTab';
 import { StoresTab } from './StoresTab';
 import { TemporalTab } from './TemporalTab';
 
-type TabType = 'customers' | 'product' | 'temporal' | 'stores' | 'employees';
+type TabType = 'customers' | 'product' | 'sales' | 'stores' | 'employees';
 export function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<TabType>('customers');
+    const [activeTab, setActiveTab] = useState<TabType>('sales');
     const [precomputedData, setPrecomputedData] = useState<any>(null);
 
     useEffect(() => {
@@ -106,8 +106,6 @@ export function Dashboard() {
 
             <div className="container py-8">
                 <div className="mx-auto">
-                    <KPIs metrics={kpis} />
-
                     {/* Tab Content */}
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -118,6 +116,21 @@ export function Dashboard() {
                             transition={{ duration: 0.2 }}
                             className="mt-8"
                         >
+                            {activeTab === 'sales' && (
+                                <>
+                                    <KPIs metrics={kpis} />
+                                    <TemporalTab
+                                        birthdayDataCustomer={birthdayDataCustomer}
+                                        birthdayDataImportantPerson={birthdayDataImportantPerson}
+                                        anniversaryData={anniversaryData}
+                                        dayOfWeekData={dayOfWeekData}
+                                        trendDataDaily={trendDataDaily}
+                                        trendDataWeekly={trendDataWeekly}
+                                        trendDataMonthly={trendDataMonthly}
+                                    />
+                                </>
+                            )}
+
                             {activeTab === 'customers' && (
                                 <CustomersTab
                                     rfmMatrix={rfmMatrix}
@@ -145,18 +158,6 @@ export function Dashboard() {
                                     materialPerformanceWithStores={materialPerformanceWithStores}
                                     colorTrends={colorTrends}
                                     materialTrends={materialTrends}
-                                />
-                            )}
-
-                            {activeTab === 'temporal' && (
-                                <TemporalTab
-                                    birthdayDataCustomer={birthdayDataCustomer}
-                                    birthdayDataImportantPerson={birthdayDataImportantPerson}
-                                    anniversaryData={anniversaryData}
-                                    dayOfWeekData={dayOfWeekData}
-                                    trendDataDaily={trendDataDaily}
-                                    trendDataWeekly={trendDataWeekly}
-                                    trendDataMonthly={trendDataMonthly}
                                 />
                             )}
 
