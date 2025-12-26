@@ -116,7 +116,7 @@ export function BirthdayHeatMap({
                                     aria-label={type === "customer" ? "Customer's Own Birthday" : "Important Person's Birthday"}
                                 >
                                     {type === "customer"
-                                        ? "Customer's Own"
+                                        ? "Customer's Birthday"
                                         : "Important Person's"}
                                 </ToggleGroupItem>
                             ))}

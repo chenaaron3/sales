@@ -183,13 +183,13 @@ export function SpecialDayHeatMap({
                                 value="customerBirthday"
                                 aria-label="Customer's Own Birthday"
                             >
-                                Customer's Own
+                                Customer's Birthday
                             </ToggleGroupItem>
                             <ToggleGroupItem
                                 value="importantPersonBirthday"
                                 aria-label="Important Person's Birthday"
                             >
-                                Important Person's
+                                Important Birthday
                             </ToggleGroupItem>
                             <ToggleGroupItem
                                 value="anniversary"
