@@ -269,6 +269,9 @@ function precomputeData() {
     genderSegments: dataAnalysis.getGenderSegments(filteredData, memberData),
     channelSegments: dataAnalysis.getChannelSegments(filteredData),
     aovSegments: dataAnalysis.getAOVSegments(filteredData),
+
+    // Employee performance (all employees, no limit)
+    employeePerformance: dataAnalysis.getEmployeePerformance(filteredData),
   };
 
   // Write to JSON file

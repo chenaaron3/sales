@@ -293,3 +293,14 @@ export interface StoreTrend {
   date: string;
   [storeName: string]: string | number;
 }
+
+export interface EmployeePerformance {
+  staffName: string;
+  staffCode: string;
+  totalRevenue: number;
+  stores: string[]; // List of stores where this employee has sales
+  products: {
+    productName: string;
+    revenue: number;
+  }[];
+}

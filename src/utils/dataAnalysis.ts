@@ -19,6 +19,7 @@ import type {
   PerformanceWithStoreBreakdown,
   CollectionTrend,
   StoreTrend,
+  EmployeePerformance,
 } from "../types";
 
 export function calculateKPIs(salesData: SalesRecord[]): KPIMetrics {
@@ -96,6 +97,67 @@ export function getCategorySalesOverTime(
   });
 
   return result;
+}
+
+// Employee Performance with Product Breakdown
+export function getEmployeePerformance(
+  salesData: SalesRecord[],
+  topN?: number // Optional limit, if not provided returns all employees
+): EmployeePerformance[] {
+  // Get all employees by revenue
+  const employeeMap = new Map<
+    string,
+    {
+      staffCode: string;
+      totalRevenue: number;
+      products: Map<string, number>;
+      stores: Set<string>;
+    }
+  >();
+
+  salesData.forEach((sale) => {
+    if (sale.transactionType !== "売上" || sale.amount <= 0) return;
+    if (!sale.staffName || !sale.staffCode) return;
+
+    const staffKey = `${sale.staffCode}-${sale.staffName}`;
+    if (!employeeMap.has(staffKey)) {
+      employeeMap.set(staffKey, {
+        staffCode: sale.staffCode,
+        totalRevenue: 0,
+        products: new Map(),
+        stores: new Set(),
+      });
+    }
+
+    const employeeData = employeeMap.get(staffKey)!;
+    employeeData.totalRevenue += sale.amount;
+
+    // Track store
+    if (sale.storeName && sale.storeName.trim()) {
+      employeeData.stores.add(sale.storeName.trim());
+    }
+
+    const productName = sale.productName || sale.productCode || "Unknown";
+    employeeData.products.set(
+      productName,
+      (employeeData.products.get(productName) || 0) + sale.amount
+    );
+  });
+
+  const result: EmployeePerformance[] = Array.from(employeeMap.entries())
+    .map(([staffKey, data]) => ({
+      staffName: staffKey.split("-").slice(1).join("-"), // Get name part after code
+      staffCode: data.staffCode,
+      totalRevenue: data.totalRevenue,
+      stores: Array.from(data.stores).sort(),
+      products: Array.from(data.products.entries())
+        .map(([productName, revenue]) => ({ productName, revenue }))
+        .sort((a, b) => b.revenue - a.revenue),
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+  // Only apply limit if topN is provided
+  return topN !== undefined ? result.slice(0, topN) : result;
 }
 
 export type Granularity = "daily" | "3day" | "weekly" | "monthly" | "quarterly";

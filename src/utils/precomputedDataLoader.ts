@@ -30,6 +30,7 @@ export interface PrecomputedData {
   genderSegments: any[];
   channelSegments: any[];
   aovSegments: any[];
+  employeePerformance: any[];
 }
 
 let cachedData: PrecomputedData | null = null;

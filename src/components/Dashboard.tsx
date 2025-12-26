@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 
 import { loadPrecomputedData } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
+import { EmployeesTab } from './EmployeesTab';
 import { Header } from './Header';
 import { KPIs } from './KPIs';
 import { ProductTab } from './ProductTab';
 import { StoresTab } from './StoresTab';
 import { TemporalTab } from './TemporalTab';
 
-type TabType = 'customers' | 'product' | 'temporal' | 'stores';
+type TabType = 'customers' | 'product' | 'temporal' | 'stores' | 'employees';
 export function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -92,6 +93,7 @@ export function Dashboard() {
         genderSegments,
         channelSegments,
         aovSegments,
+        employeePerformance,
     } = precomputedData;
 
     return (
@@ -155,6 +157,12 @@ export function Dashboard() {
                                     storePerformanceWithProducts={storePerformanceWithProducts}
                                     storeTrendsWeekly={storeTrendsWeekly}
                                     storeTrendsMonthly={storeTrendsMonthly}
+                                />
+                            )}
+
+                            {activeTab === 'employees' && (
+                                <EmployeesTab
+                                    employeePerformance={employeePerformance}
                                 />
                             )}
                         </motion.div>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-type TabType = 'customers' | 'product' | 'temporal' | 'stores';
+type TabType = 'customers' | 'product' | 'temporal' | 'stores' | 'employees';
 
 interface HeaderProps {
     activeTab: TabType;
@@ -12,6 +12,7 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
         { id: 'customers', label: 'Customers' },
         { id: 'product', label: 'Product' },
         { id: 'stores', label: 'Stores' },
+        { id: 'employees', label: 'Employees' },
         { id: 'temporal', label: 'Time' },
     ];
 
@@ -41,11 +42,10 @@ export function Header({ activeTab, onTabChange }: HeaderProps) {
                                         }}
                                     />
                                 )}
-                                <span className={`relative z-10 ${
-                                    isActive
-                                        ? 'text-gray-900 dark:text-white'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                }`}>
+                                <span className={`relative z-10 ${isActive
+                                    ? 'text-gray-900 dark:text-white'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                    }`}>
                                     {tab.label}
                                 </span>
                             </button>
