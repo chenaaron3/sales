@@ -1,43 +1,32 @@
 import { useEffect, useState } from 'react';
 
-import {
-    calculateKPIs, getAOVSegments, getAttributeTrends, getBirthdaySalesCorrelation,
-    getChannelSegments, getCollectionPerformanceWithStores, getCollectionTrends,
-    getCustomerSegments, getDayOfWeekAnalysis, getFrequencySegments,
-    getProductPerformanceWithStores, getProductTrends, getRecencySegments, getRFMSegments,
-    getStorePerformanceWithProducts, getStoreTrends, getTrendsByGranularity
-} from '../utils/dataAnalysis';
-import { loadMemberData, loadSalesData } from '../utils/dataParser';
+import { loadPrecomputedData } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
 import { KPIs } from './KPIs';
 import { ProductTab } from './ProductTab';
 import { StoresTab } from './StoresTab';
 import { TemporalTab } from './TemporalTab';
 
-import type { MemberRecord, SalesRecord } from '../types';
-
 type TabType = 'customers' | 'product' | 'temporal' | 'stores';
 export function Dashboard() {
-    const [salesData, setSalesData] = useState<SalesRecord[]>([]);
-    const [memberData, setMemberData] = useState<MemberRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('customers');
+    const [precomputedData, setPrecomputedData] = useState<any>(null);
 
     useEffect(() => {
         async function loadData() {
             try {
                 setLoading(true);
-                const [sales, members] = await Promise.all([
-                    loadSalesData(),
-                    loadMemberData(),
-                ]);
-
-                setSalesData(sales as SalesRecord[]);
-                setMemberData(members as MemberRecord[]);
+                console.log('🚀 Dashboard: Loading precomputed data...');
+                const data = await loadPrecomputedData();
+                console.log('✅ Dashboard: Precomputed data loaded, rendering charts');
+                setPrecomputedData(data);
                 setLoading(false);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load data');
+                const errorMessage = err instanceof Error ? err.message : 'Failed to load precomputed data';
+                console.error('❌ Dashboard: Error loading precomputed data:', err);
+                setError(errorMessage);
                 setLoading(false);
             }
         }
@@ -68,42 +57,40 @@ export function Dashboard() {
         );
     }
 
-    // Filter data - default to Q3 2024 onwards
-    const filteredData = salesData.filter((record) => {
-        if (!record.purchaseDate) return false;
-        // Filter for Q3 2024 onwards
-        if (record.purchaseDate < '2024-07-01') return false;
-        // Only count sales
-        if (record.transactionType !== '売上' || record.amount <= 0) return false;
-        return true;
-    });
+    if (!precomputedData) {
+        return null;
+    }
 
-    const kpis = calculateKPIs(filteredData);
-    const trendData = getTrendsByGranularity(filteredData, 'monthly');
-    const birthdayData = getBirthdaySalesCorrelation(filteredData, memberData, 30, 'importantPerson');
-    const colorTrends = getAttributeTrends(filteredData, 'color', 'monthly');
-    const materialTrends = getAttributeTrends(filteredData, 'material', 'monthly');
-    const customerSegments = getCustomerSegments(filteredData);
-    const dayOfWeekData = getDayOfWeekAnalysis(filteredData);
-    const productTrends = getProductTrends(filteredData, 10, 'monthly');
-    const collectionTrends = getCollectionTrends(filteredData, 10, 'monthly');
-    const productPerformanceWithStores = getProductPerformanceWithStores(filteredData, 10);
-    const collectionPerformanceWithStores = getCollectionPerformanceWithStores(filteredData, 10);
-    const storePerformanceWithProducts = getStorePerformanceWithProducts(filteredData, 10);
-    const storeTrends = getStoreTrends(filteredData, 10, 'monthly');
-
-    // Advanced segmentation
-    const rfmSegments = getRFMSegments(filteredData);
-    const frequencySegments = getFrequencySegments(filteredData);
-    const recencySegments = getRecencySegments(filteredData);
-    const channelSegments = getChannelSegments(filteredData);
-    const aovSegments = getAOVSegments(filteredData);
+    // Use precomputed data directly
+    const {
+        kpis,
+        trendDataDaily,
+        trendDataWeekly,
+        trendDataMonthly,
+        birthdayDataCustomer,
+        birthdayDataImportantPerson,
+        dayOfWeekData,
+        colorTrends,
+        materialTrends,
+        customerSegments,
+        productTrends,
+        collectionTrends,
+        productPerformanceWithStores,
+        collectionPerformanceWithStores,
+        storePerformanceWithProducts,
+        storeTrends,
+        rfmSegments,
+        frequencySegments,
+        recencySegments,
+        channelSegments,
+        aovSegments,
+    } = precomputedData;
 
     const tabs: { id: TabType; label: string }[] = [
-        { id: 'customers', label: 'Customers (Who)' },
-        { id: 'product', label: 'Product (What)' },
-        { id: 'temporal', label: 'Temporal (When)' },
-        { id: 'stores', label: 'Stores (Where)' },
+        { id: 'customers', label: 'Customers' },
+        { id: 'product', label: 'Product' },
+        { id: 'stores', label: 'Stores' },
+        { id: 'temporal', label: 'Time' },
     ];
 
     return (
@@ -159,9 +146,12 @@ export function Dashboard() {
 
                     {activeTab === 'temporal' && (
                         <TemporalTab
-                            birthdayData={birthdayData}
+                            birthdayDataCustomer={birthdayDataCustomer}
+                            birthdayDataImportantPerson={birthdayDataImportantPerson}
                             dayOfWeekData={dayOfWeekData}
-                            trendData={trendData}
+                            trendDataDaily={trendDataDaily}
+                            trendDataWeekly={trendDataWeekly}
+                            trendDataMonthly={trendDataMonthly}
                         />
                     )}
 

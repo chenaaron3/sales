@@ -128,7 +128,7 @@ export function getDateKey(date: Date, granularity: Granularity): string {
     }
 
     case "weekly": {
-      // Get week number (ISO week would be more complex, so use simple week from year start)
+      // Get week number (simple week from year start)
       const startOfYear = new Date(year, 0, 1);
       const daysDiff = Math.floor(
         (date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)

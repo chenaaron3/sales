@@ -32,8 +32,8 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
     const productList = Array.from(allProducts);
 
     // Prepare chart data with product breakdown
-    const top10 = data.slice(0, 10);
-    const chartData = top10.map((item) => {
+    const top25 = data.slice(0, 25);
+    const chartData = top25.map((item) => {
         const entry: any = {
             name: item.name.length > 30 ? item.name.substring(0, 30) + '...' : item.name,
             fullName: item.name,
@@ -59,11 +59,11 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Top 10 Stores Performance by Product
+                Top 25 Stores Performance by Product
             </h2>
             <div className="flex gap-6">
                 <div className="flex-1 overflow-visible">
-                    <ResponsiveContainer width="100%" height={600}>
+                    <ResponsiveContainer width="100%" height={800}>
                         <BarChart
                             data={chartData}
                             layout="vertical"

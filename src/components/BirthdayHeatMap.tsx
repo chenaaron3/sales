@@ -1,12 +1,12 @@
-import type { BirthdaySalesData } from "../types";
+import { useState } from 'react';
 
+import type { BirthdaySalesData } from "../types";
 import type { BirthdayType } from "../utils/dataAnalysis";
 
 interface BirthdayHeatMapProps {
     data: BirthdaySalesData[];
-    metric: "salesCount" | "revenue" | "transactions";
+    metric: "revenue";
     birthdayType: BirthdayType;
-    onMetricChange?: (metric: "salesCount" | "revenue" | "transactions") => void;
     onBirthdayTypeChange?: (type: BirthdayType) => void;
 }
 
@@ -14,9 +14,15 @@ export function BirthdayHeatMap({
     data,
     metric,
     birthdayType,
-    onMetricChange,
     onBirthdayTypeChange
 }: BirthdayHeatMapProps) {
+    const [hoveredBucket, setHoveredBucket] = useState<{
+        dayText: string;
+        birthdayTypeText: string;
+        revenue: number;
+        percentile: number;
+    } | null>(null);
+
     if (data.length === 0) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
@@ -81,20 +87,45 @@ export function BirthdayHeatMap({
         buckets.push({ startDay, endDay, value, count: chunk.length });
     }
 
-    const metricLabels = {
-        salesCount: "Sales Count",
-        revenue: "Revenue",
-        transactions: "Transactions",
-    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
             <div className="mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    Birthday Sales Correlation
-                </h2>
+                <div className="flex items-center gap-2 mb-2">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        Birthday Sales Correlation
+                    </h2>
+                    <div className="group relative">
+                        <svg
+                            className="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <div className="absolute left-0 top-6 z-10 w-64 p-3 bg-gray-900 text-white text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
+                            <p className="mb-2">
+                                <strong>How to read this heatmap:</strong>
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 text-xs">
+                                <li><strong>Negative days</strong> = Days before the birthday</li>
+                                <li><strong>Positive days</strong> = Days after the birthday</li>
+                                <li><strong>Blue colors</strong> = Lower revenue (cold periods)</li>
+                                <li><strong>Red colors</strong> = Higher revenue (hot periods)</li>
+                                <li>Hover over bars to see exact revenue values</li>
+                            </ul>
+                            <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                        </div>
+                    </div>
+                </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Sales activity relative to birthdays (negative = before birthday, positive = after)
+                    Revenue activity relative to birthdays (negative = before birthday, positive = after)
                 </p>
             </div>
 
@@ -122,26 +153,22 @@ export function BirthdayHeatMap({
                     </div>
                 </div>
 
-                {/* Metric Toggle */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Metric
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                        {(["salesCount", "revenue", "transactions"] as const).map((m) => (
-                            <button
-                                key={m}
-                                onClick={() => onMetricChange?.(m)}
-                                className={`px-3 py-1 rounded text-sm ${metric === m
-                                    ? "bg-indigo-600 text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-                                    }`}
-                            >
-                                {metricLabels[m]}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+            </div>
+
+            {/* Info Display */}
+            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[60px] flex items-center">
+                {hoveredBucket ? (
+                    <p className="text-sm text-gray-900 dark:text-white">
+                        <span className="font-semibold">{hoveredBucket.dayText}</span>{" "}
+                        <span className="font-semibold">{hoveredBucket.birthdayTypeText}</span> has{" "}
+                        <span className="font-semibold">¥{hoveredBucket.revenue.toLocaleString('ja-JP')}</span> revenue{" "}
+                        <span className="text-gray-600 dark:text-gray-400">({hoveredBucket.percentile}th percentile)</span>
+                    </p>
+                ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                        Hover over a bucket to see details
+                    </p>
+                )}
             </div>
 
             <div className="overflow-x-auto">
@@ -151,16 +178,59 @@ export function BirthdayHeatMap({
                         const color = getColor(intensity);
                         const avgValue = bucket.value / bucket.count;
 
+                        // Determine if it's before or after birthday
+                        const isBefore = bucket.startDay < 0;
+                        const isAfter = bucket.startDay > 0;
+                        const isOnBirthday = bucket.startDay === 0;
+
+                        // Get the day range text
+                        let dayText = "";
+                        if (bucket.startDay === bucket.endDay) {
+                            const day = Math.abs(bucket.startDay);
+                            if (isOnBirthday) {
+                                dayText = "On the birthday";
+                            } else if (isBefore) {
+                                dayText = `${day} day${day !== 1 ? 's' : ''} before`;
+                            } else {
+                                dayText = `${day} day${day !== 1 ? 's' : ''} after`;
+                            }
+                        } else {
+                            const startDay = Math.abs(bucket.startDay);
+                            const endDay = Math.abs(bucket.endDay);
+                            if (isBefore) {
+                                dayText = `${startDay}-${endDay} days before`;
+                            } else if (isAfter) {
+                                dayText = `${startDay}-${endDay} days after`;
+                            } else {
+                                dayText = `${startDay}-${endDay} days around`;
+                            }
+                        }
+
+                        const birthdayTypeText = birthdayType === "customer"
+                            ? "Customer's Own Birthday"
+                            : "Important Person's Birthday";
+
+                        // Calculate percentile
+                        const percentile = maxValue === minValue
+                            ? 100
+                            : Math.round(((avgValue - minValue) / (maxValue - minValue)) * 100);
+
                         return (
                             <div
                                 key={index}
-                                className="flex-1 min-w-[20px] relative group"
+                                className="flex-1 min-w-[20px] relative group cursor-pointer"
                                 style={{
                                     backgroundColor: color,
                                     height: "60px",
                                     border: "1px solid rgba(0,0,0,0.1)",
                                 }}
-                                title={`Days ${bucket.startDay} to ${bucket.endDay}: ${metricLabels[metric]} = ${Math.round(avgValue).toLocaleString()}`}
+                                onMouseEnter={() => setHoveredBucket({
+                                    dayText,
+                                    birthdayTypeText,
+                                    revenue: Math.round(avgValue),
+                                    percentile,
+                                })}
+                                onMouseLeave={() => setHoveredBucket(null)}
                             >
                                 <div className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                                     {Math.round(avgValue).toLocaleString()}

@@ -30,15 +30,20 @@ This dashboard is designed to answer key business questions:
 ### Core Dashboard
 
 - **KPI Cards**: Total revenue, transactions, average order value, and active customers
-- **Interactive Filters**: Date range, categories, and stores
-- **Configurable Time Granularity**: Daily, 3-day, weekly, monthly, or quarterly views
+- **Tab-Based Navigation**: Four main analysis sections:
+  - **Customers (Who)**: Customer segmentation and behavior analysis
+  - **Product (What)**: Product and collection performance with store breakdowns
+  - **Stores (Where)**: Store performance with product breakdowns
+  - **Time (When)**: Temporal patterns, birthday correlations, and trends
+- **Build-Time Precomputation**: All analysis data is precomputed at build time for lightning-fast load times
 
 ### Sales Analysis
 
 1. **Trend Analysis**: Revenue, transactions, and customer trends over time
-2. **Category Sales**: Sales volume by product category over time with line charts
-3. **Product Performance**: Top 10 products by revenue, quantity, or transaction count
-4. **Store Performance**: Top 15 stores ranked by revenue with detailed metrics
+2. **Product Performance**: Top 25 products/collections with store breakdowns (stacked bar charts)
+3. **Product Trends**: Top 25 products/collections trends over time
+4. **Store Performance**: Top 25 stores with product breakdowns (stacked bar charts)
+5. **Store Trends**: Top 25 stores trends over time
 
 ### Customer Insights
 
@@ -73,7 +78,8 @@ This dashboard is designed to answer key business questions:
 - **Vite**: Build tool and dev server
 - **Tailwind CSS 4**: Utility-first CSS framework
 - **Recharts**: React charting library for data visualization
-- **PapaParse**: Client-side CSV parsing
+- **PapaParse**: CSV parsing (used at build time)
+- **tsx**: TypeScript execution for build scripts
 
 ## 📦 Installation
 
@@ -90,18 +96,29 @@ This dashboard is designed to answer key business questions:
    - `public/data/sales_jouete_1y.csv` - Sales transaction data
    - `public/data/member_jouete.csv` - Customer/member data
 
-4. **Start the development server**:
+4. **Precompute analysis data** (required before first run):
+
+   ```bash
+   npm run precompute
+   ```
+
+   This generates `public/data/precomputed.json` with all analysis results for fast loading.
+
+5. **Start the development server**:
 
    ```bash
    npm run dev
    ```
 
-5. **Open your browser** to the URL shown in the terminal (typically `http://localhost:5173`)
+6. **Open your browser** to the URL shown in the terminal (typically `http://localhost:5173`)
 
-6. **Build for production**:
+7. **Build for production**:
+
    ```bash
    npm run build
    ```
+
+   Note: The build process automatically runs precomputation before building.
 
 ## 📊 Data Structure
 
@@ -143,16 +160,23 @@ Contains customer/member information:
 ### Main Components
 
 - **`Dashboard.tsx`**: Main orchestrator component managing state and data flow
-- **`Filters.tsx`**: Interactive filter controls for date range, categories, and stores
 - **`KPIs.tsx`**: Displays key performance indicator cards
+
+### Tab Components
+
+- **`CustomersTab.tsx`**: Customer segmentation and behavior analysis
+- **`ProductTab.tsx`**: Product and collection performance with trends
+- **`StoresTab.tsx`**: Store performance with trends
+- **`TemporalTab.tsx`**: Time-based analysis including birthday correlations
 
 ### Visualization Components
 
 - **`TrendChart.tsx`**: Time series trends (revenue, transactions, customers)
-- **`CategorySalesChart.tsx`**: Line chart showing sales by product category over time
 - **`BirthdayHeatMap.tsx`**: Heat map visualization of birthday-sales correlation
-- **`ProductPerformance.tsx`**: Horizontal bar chart of top products
-- **`StorePerformance.tsx`**: Horizontal bar chart comparing store performance
+- **`ProductPerformance.tsx`**: Stacked horizontal bar chart of top 25 products/collections by store
+- **`ProductTrendsChart.tsx`**: Line chart showing top 25 products/collections trends over time
+- **`StorePerformance.tsx`**: Stacked horizontal bar chart of top 25 stores by product
+- **`StoreTrendsChart.tsx`**: Line chart showing top 25 stores trends over time
 - **`AttributeTrends.tsx`**: Line chart showing color/material trends over time
 - **`AdvancedCustomerSegmentation.tsx`**: Comprehensive customer segmentation with multiple dimensions
 - **`DayOfWeekAnalysis.tsx`**: Bar chart showing sales patterns by day of week
@@ -177,11 +201,17 @@ Contains customer/member information:
 3. **Product Analysis**:
 
    - `getTopProducts()`: Top products by revenue, quantity, or transactions
+   - `getProductTrends()`: Product trends over time
+   - `getProductPerformanceWithStores()`: Product performance broken down by store
+   - `getCollectionTrends()`: Collection trends over time
+   - `getCollectionPerformanceWithStores()`: Collection performance broken down by store
    - `getAttributeTrends()`: Trends for product attributes (color/material) over time
 
 4. **Store Analysis**:
 
    - `getStorePerformance()`: Store comparison metrics (revenue, transactions, customers, AOV)
+   - `getStoreTrends()`: Store trends over time
+   - `getStorePerformanceWithProducts()`: Store performance broken down by product
 
 5. **Customer Segmentation**:
 
@@ -206,12 +236,24 @@ Contains customer/member information:
 8. **Data Filtering**:
    - `filterSalesData()`: Filters sales data by date range, categories, and stores
 
-### Data Parsing (`src/utils/dataParser.ts`)
+### Data Loading
 
-- `parseSalesCSV()`: Parses sales CSV and transforms Japanese headers to English
-- `loadSalesData()`: Loads sales data from public directory
-- `loadMemberData()`: Loads member data from public directory
-- Handles empty lines and validates required fields
+- **Precomputed Data Loader** (`src/utils/precomputedDataLoader.ts`):
+
+  - `loadPrecomputedData()`: Loads precomputed analysis results from JSON file
+  - Caches data in memory for subsequent calls
+  - Validates data structure on load
+
+- **Data Parser** (`src/utils/dataParser.ts`) - Used at build time:
+
+  - `parseSalesCSV()`: Parses sales CSV and transforms Japanese headers to English
+  - `parseMemberCSV()`: Parses member CSV and transforms headers
+  - Handles empty lines and validates required fields
+
+- **Build Scripts** (`scripts/precomputeData.ts`):
+  - Precomputes all analysis results at build time
+  - Generates `public/data/precomputed.json` with all calculated metrics
+  - Processes 249,000+ sales records and 121,000+ member records
 
 ## 📁 Project Structure
 
@@ -220,25 +262,32 @@ sales/
 ├── public/
 │   └── data/
 │       ├── sales_jouete_1y.csv      # Sales transaction data
-│       └── member_jouete.csv        # Customer/member data
+│       ├── member_jouete.csv        # Customer/member data
+│       └── precomputed.json         # Precomputed analysis results (generated)
+├── scripts/
+│   └── precomputeData.ts            # Build-time data precomputation script
 ├── src/
 │   ├── components/                  # React components
+│   │   ├── CustomersTab.tsx         # Customer analysis tab
+│   │   ├── ProductTab.tsx            # Product analysis tab
+│   │   ├── StoresTab.tsx             # Store analysis tab
+│   │   ├── TemporalTab.tsx           # Time analysis tab
 │   │   ├── AdvancedCustomerSegmentation.tsx
 │   │   ├── AttributeTrends.tsx
 │   │   ├── BirthdayHeatMap.tsx
-│   │   ├── CategorySalesChart.tsx
-│   │   ├── CustomerSegments.tsx
 │   │   ├── Dashboard.tsx
 │   │   ├── DayOfWeekAnalysis.tsx
-│   │   ├── Filters.tsx
 │   │   ├── KPICard.tsx
 │   │   ├── KPIs.tsx
 │   │   ├── ProductPerformance.tsx
+│   │   ├── ProductTrendsChart.tsx
 │   │   ├── StorePerformance.tsx
+│   │   ├── StoreTrendsChart.tsx
 │   │   └── TrendChart.tsx
 │   ├── utils/
 │   │   ├── dataAnalysis.ts          # All analysis functions
-│   │   └── dataParser.ts            # CSV parsing utilities
+│   │   ├── dataParser.ts            # CSV parsing utilities (build-time)
+│   │   └── precomputedDataLoader.ts # Precomputed data loader
 │   ├── types.ts                     # TypeScript type definitions
 │   ├── App.tsx                      # Root component
 │   ├── main.tsx                     # Application entry point
@@ -292,9 +341,14 @@ The Advanced Customer Segmentation component allows you to switch between differ
 
 ### Product & Store Analysis
 
-- **Product Performance**: Toggle between Revenue, Quantity, and Transactions metrics
-- **Store Performance**: View top 15 stores with revenue, transactions, customers, and AOV
-- **Attribute Trends**: Switch between Color and Material views
+- **Product Performance**: View top 25 products/collections with store breakdowns (stacked bars)
+  - Toggle between Product and Collection views
+  - Hover over bars to see detailed store breakdown in sidebar
+  - View trends over time for selected view type
+- **Store Performance**: View top 25 stores with product breakdowns (stacked bars)
+  - Hover over bars to see detailed product breakdown in sidebar
+  - View store trends over time
+- **Attribute Trends**: Switch between Color and Material views to see attribute popularity over time
 
 ## 💡 Key Insights Provided
 
@@ -312,17 +366,20 @@ The Advanced Customer Segmentation component allows you to switch between differ
 - Only transactions with `transactionType === "売上"` (sales) are counted
 - Negative amounts are filtered out (refunds/cancellations)
 - Store names are normalized (trimmed) to handle variations
-- Date filtering respects the selected date range
+- Default date filtering: Q3 2024 onwards (July 1, 2024)
 - All monetary values are in Japanese Yen (¥)
 - Number formatting uses Japanese locale (`ja-JP`)
+- All analysis is precomputed at build time for optimal performance
 
 ## 📝 Notes
 
-- The dashboard performs all analysis client-side
-- Large datasets may take a moment to load and process
-- CSV files should be placed in `public/data/` directory
-- The application automatically skips the first line of sales CSV (header row)
-- Member data is required for birthday correlation analysis
+- **Build-Time Precomputation**: All analysis is performed at build time, not at runtime
+- The precomputed JSON file contains all calculated metrics for instant loading
+- CSV files are only processed during the build/precompute step
+- The application loads precomputed data from `public/data/precomputed.json`
+- If precomputed data is missing, the app will show a clear error message
+- Run `npm run precompute` to regenerate analysis data after CSV updates
+- The build process automatically runs precomputation via the `prebuild` hook
 
 ## 🎨 Styling
 
@@ -341,4 +398,5 @@ Private project - All rights reserved
 ---
 
 **Built with ❤️ for understanding customer behavior and driving sales growth**
+
 # sales
