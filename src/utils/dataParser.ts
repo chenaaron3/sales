@@ -70,8 +70,9 @@ export function parseMemberCSV(csvText: string): any[] {
 }
 
 export async function loadSalesData(): Promise<any[]> {
-  // Fetch from public directory
-  const response = await fetch("/data/sales_jouete_1y.csv");
+  // Fetch from public directory - use BASE_URL to respect Vite base path
+  const baseUrl = import.meta.env.BASE_URL;
+  const response = await fetch(`${baseUrl}data/sales_jouete_1y.csv`);
   if (!response.ok) {
     throw new Error(`Failed to load sales data: ${response.statusText}`);
   }
@@ -80,7 +81,9 @@ export async function loadSalesData(): Promise<any[]> {
 }
 
 export async function loadMemberData(): Promise<any[]> {
-  const response = await fetch("/data/member_jouete.csv");
+  // Fetch from public directory - use BASE_URL to respect Vite base path
+  const baseUrl = import.meta.env.BASE_URL;
+  const response = await fetch(`${baseUrl}data/member_jouete.csv`);
   if (!response.ok) {
     throw new Error(`Failed to load member data: ${response.statusText}`);
   }
