@@ -1129,6 +1129,7 @@ export function getRFMMatrix(salesData: SalesRecord[]): RFMMatrixCell[] {
     {
       count: number;
       revenue: number;
+      transactionCount: number; // Track total transactions for AOV calculation
       mScoreSum: number;
       segments: Set<string>;
     }
@@ -1141,6 +1142,7 @@ export function getRFMMatrix(salesData: SalesRecord[]): RFMMatrixCell[] {
       matrixMap.set(key, {
         count: 0,
         revenue: 0,
+        transactionCount: 0,
         mScoreSum: 0,
         segments: new Set(),
       });
@@ -1227,6 +1229,7 @@ export function getRFMMatrix(salesData: SalesRecord[]): RFMMatrixCell[] {
     const cell = matrixMap.get(key)!;
     cell.count++;
     cell.revenue += customer.totalRevenue;
+    cell.transactionCount += customer.transactionCount; // Sum transactions for AOV
     cell.mScoreSum += mScore;
 
     // Add segment name if this customer matches a named segment
@@ -1290,7 +1293,9 @@ export function getRFMMatrix(salesData: SalesRecord[]): RFMMatrixCell[] {
         fScore: f,
         count: cell.count,
         totalRevenue: cell.revenue,
-        averageRevenue: cell.count > 0 ? cell.revenue / cell.count : 0,
+        // AOV = total revenue / total transactions (not per customer)
+        averageRevenue:
+          cell.transactionCount > 0 ? cell.revenue / cell.transactionCount : 0,
         averageMScore: cell.count > 0 ? cell.mScoreSum / cell.count : 0,
         percentage:
           customers.length > 0 ? (cell.count / customers.length) * 100 : 0,
