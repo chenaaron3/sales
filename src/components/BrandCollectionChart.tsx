@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import {
     Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
+import { formatCurrency, formatNumber } from '../utils/i18n';
 import type { BrandCollectionPerformance } from '../types';
 
 interface BrandCollectionChartProps {
@@ -13,10 +15,12 @@ interface BrandCollectionChartProps {
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8'];
 
 export function BrandCollectionChart({ data, metric, type }: BrandCollectionChartProps) {
+    const { t } = useTranslation();
+
     if (data.length === 0) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">No data available</p>
+                <p className="text-gray-500 dark:text-gray-400">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -33,23 +37,21 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
         productCount: item.productCount,
     }));
 
-    const metricLabels = {
-        revenue: 'Revenue',
-        quantity: 'Quantity',
-        transactions: 'Transactions',
-    };
-
     const formatValue = (value: number) => {
         if (metric === 'revenue') {
-            return `¥${value.toLocaleString('ja-JP')}`;
+            return formatCurrency(value);
         }
-        return value.toLocaleString('ja-JP');
+        return formatNumber(value);
     };
+
+    const title = type === 'brand' 
+        ? t('brandCollection.topBrands') 
+        : t('brandCollection.topCollections');
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Top {type === 'brand' ? 'Brands' : 'Collections'} Performance ({metricLabels[metric]})
+                {title} ({t(`charts.${metric}`)})
             </h2>
             <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 150, bottom: 5 }}>
@@ -69,7 +71,7 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
                         }}
                     />
                     <Legend />
-                    <Bar dataKey={metric} fill="#8884d8" name={metricLabels[metric]}>
+                    <Bar dataKey={metric} fill="#8884d8" name={t(`charts.${metric}`)}>
                         {chartData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
@@ -83,7 +85,7 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
                             {item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}
                         </div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">
-                            {item.productCount} products • Avg: ¥{Math.round(item.averagePrice).toLocaleString('ja-JP')}
+                            {formatNumber(item.productCount)} {t('charts.products')} • {t('charts.avg')}: {formatCurrency(Math.round(item.averagePrice))}
                         </div>
                     </div>
                 ))}
@@ -91,4 +93,3 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
         </div>
     );
 }
-

@@ -1,3 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
+import { formatCurrency } from '../utils/i18n';
+
 interface BreakdownItem {
     name: string;
     revenue: number;
@@ -25,6 +29,8 @@ export function BreakdownPanel({
     emptyMessage,
     itemLabel,
 }: BreakdownPanelProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="w-80 shrink-0">
             <div className="sticky top-4 bg-card border border-border rounded-lg p-6 shadow-md min-h-[200px]">
@@ -35,10 +41,10 @@ export function BreakdownPanel({
                         </h3>
                         <div className="mb-6 pb-4 border-b border-border">
                             <div className="text-sm text-muted-foreground mb-1">
-                                Total Revenue
+                                {t('kpis.totalRevenue')}
                             </div>
                             <div className="text-xl font-bold text-foreground">
-                                ¥{totalRevenue.toLocaleString('ja-JP')}
+                                {formatCurrency(totalRevenue)}
                             </div>
                         </div>
                         <div className="space-y-3">
@@ -68,11 +74,11 @@ export function BreakdownPanel({
                                                         {item.name}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground mt-0.5">
-                                                        {percentage > 0 && `${percentage.toFixed(1)}% of total`}
+                                                        {percentage > 0 && `${percentage.toFixed(1)}% ${t('charts.ofTotal')}`}
                                                     </div>
                                                 </div>
                                                 <div className="text-sm font-semibold text-foreground shrink-0 ml-2">
-                                                    ¥{item.revenue.toLocaleString('ja-JP')}
+                                                    {formatCurrency(item.revenue)}
                                                 </div>
                                             </div>
                                         );
@@ -96,4 +102,3 @@ export function BreakdownPanel({
         </div>
     );
 }
-

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DayOfWeekAnalysisChart } from './DayOfWeekAnalysis';
 import { SpecialDayHeatMap } from './SpecialDayHeatMap';
@@ -28,6 +29,7 @@ export function TemporalTab({
     trendDataWeekly,
     trendDataMonthly,
 }: TemporalTabProps) {
+    const { t } = useTranslation();
     const [granularity, setGranularity] = useState<Granularity>('monthly');
 
     const trendData = granularity === 'daily'
@@ -51,10 +53,10 @@ export function TemporalTab({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>
-                            Sales Trends
+                            {t('temporal.salesTrends')}
                         </CardTitle>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Time:</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{t('common.time')}:</span>
                             <ToggleGroup
                                 type="single"
                                 value={granularity}
@@ -66,7 +68,7 @@ export function TemporalTab({
                                         value={g}
                                         aria-label={`${g} granularity`}
                                     >
-                                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                                        {t(`temporal.granularity.${g}`)}
                                     </ToggleGroupItem>
                                 ))}
                             </ToggleGroup>

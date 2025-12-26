@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { formatCurrency } from '../utils/i18n';
 import type { Granularity } from '../utils/dataAnalysis';
 import type { TimeSeriesData } from '../types';
 
@@ -38,47 +40,49 @@ const getWeekDateRange = (weekLabel: string): { weekLabel: string; dateRange: st
     };
 };
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, label, data, granularity }: any) => {
-    if (active && payload && payload.length) {
-        const revenue = payload[0].value as number;
-
-        // Calculate percentile
-        const revenues = data.map((d: TimeSeriesData) => d.revenue);
-        const maxRevenue = Math.max(...revenues);
-        const minRevenue = Math.min(...revenues);
-        const percentile = maxRevenue === minRevenue
-            ? 100
-            : Math.round(((revenue - minRevenue) / (maxRevenue - minRevenue)) * 100);
-
-        // Format label - add week date range for weekly granularity
-        let displayLabel = label;
-        let dateRange = '';
-        if (granularity === 'weekly' && label.match(/^\d{4}-W\d+$/)) {
-            const weekInfo = getWeekDateRange(label);
-            displayLabel = weekInfo.weekLabel;
-            dateRange = weekInfo.dateRange;
-        }
-
-        return (
-            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{displayLabel}</p>
-                {dateRange && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{dateRange}</p>
-                )}
-                <p className="text-sm text-gray-900 dark:text-white">
-                    Revenue: <span className="font-semibold">¥{revenue.toLocaleString('ja-JP')}</span>
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {percentile}th percentile
-                </p>
-            </div>
-        );
-    }
-    return null;
-};
-
 export function TrendChart({ data, granularity }: TrendChartProps) {
+    const { t } = useTranslation();
+
+    // Custom tooltip component
+    const CustomTooltip = ({ active, payload, label, data, granularity }: any) => {
+        if (active && payload && payload.length) {
+            const revenue = payload[0].value as number;
+
+            // Calculate percentile
+            const revenues = data.map((d: TimeSeriesData) => d.revenue);
+            const maxRevenue = Math.max(...revenues);
+            const minRevenue = Math.min(...revenues);
+            const percentile = maxRevenue === minRevenue
+                ? 100
+                : Math.round(((revenue - minRevenue) / (maxRevenue - minRevenue)) * 100);
+
+            // Format label - add week date range for weekly granularity
+            let displayLabel = label;
+            let dateRange = '';
+            if (granularity === 'weekly' && label.match(/^\d{4}-W\d+$/)) {
+                const weekInfo = getWeekDateRange(label);
+                displayLabel = weekInfo.weekLabel;
+                dateRange = weekInfo.dateRange;
+            }
+
+            return (
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{displayLabel}</p>
+                    {dateRange && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{dateRange}</p>
+                    )}
+                    <p className="text-sm text-gray-900 dark:text-white">
+                        {t('charts.revenue')}: <span className="font-semibold">{formatCurrency(revenue)}</span>
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        {t('charts.percentile', { value: percentile })}
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -91,8 +95,8 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
                     tick={{ fontSize: 12 }}
                 />
                 <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
-                <Tooltip content={<CustomTooltip data={data} granularity={granularity} />} />
-                <Bar dataKey="revenue" fill="#8884d8" name="Revenue" />
+                <Tooltip content={(props) => <CustomTooltip {...props} data={data} granularity={granularity} t={t} />} />
+                <Bar dataKey="revenue" fill="#8884d8" name={t('charts.revenue')} />
             </BarChart>
         </ResponsiveContainer>
     );

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
+import { formatCurrency, formatNumber } from '../utils/i18n';
 import type { BirthdaySalesData } from "../types";
 
 type SpecialDayType = 'customerBirthday' | 'importantPersonBirthday' | 'anniversary';
@@ -20,6 +22,7 @@ export function SpecialDayHeatMap({
     anniversaryData,
     metric,
 }: SpecialDayHeatMapProps) {
+    const { t } = useTranslation();
     const [selectedType, setSelectedType] = useState<SpecialDayType>('customerBirthday');
     const [hoveredBucket, setHoveredBucket] = useState<{
         dayText: string;
@@ -32,7 +35,7 @@ export function SpecialDayHeatMap({
         return (
             <Card className="mb-8">
                 <CardContent className="pt-6">
-                    <p className="text-muted-foreground">No special day data available</p>
+                    <p className="text-muted-foreground">{t('specialDays.noDataAvailable')}</p>
                 </CardContent>
             </Card>
         );
@@ -40,21 +43,21 @@ export function SpecialDayHeatMap({
 
     // Group data into buckets for better visualization
     const bucketSize = 3;
-    const createBuckets = (data: BirthdaySalesData[], typeLabel: string) => {
+    const createBuckets = (data: BirthdaySalesData[], typeLabelKey: string) => {
         const buckets: { startDay: number; endDay: number; value: number; count: number; type: string }[] = [];
         for (let i = 0; i < data.length; i += bucketSize) {
             const chunk = data.slice(i, i + bucketSize);
             const startDay = chunk[0]?.daysFromBirthday ?? 0;
             const endDay = chunk[chunk.length - 1]?.daysFromBirthday ?? 0;
             const value = chunk.reduce((sum, d) => sum + d[metric], 0);
-            buckets.push({ startDay, endDay, value, count: chunk.length, type: typeLabel });
+            buckets.push({ startDay, endDay, value, count: chunk.length, type: typeLabelKey });
         }
         return buckets;
     };
 
-    const birthdayCustomerBuckets = createBuckets(birthdayDataCustomer, "Customer's Own Birthday");
-    const birthdayImportantBuckets = createBuckets(birthdayDataImportantPerson, "Important Person's Birthday");
-    const anniversaryBuckets = createBuckets(anniversaryData, "Anniversary");
+    const birthdayCustomerBuckets = createBuckets(birthdayDataCustomer, 'specialDays.customerOwnBirthday');
+    const birthdayImportantBuckets = createBuckets(birthdayDataImportantPerson, 'specialDays.importantPersonBirthday');
+    const anniversaryBuckets = createBuckets(anniversaryData, 'specialDays.anniversary');
 
     // Calculate min/max from bucket values (not raw data) since we're using bucket values for colors
     const getMinMaxFromBuckets = (buckets: { value: number; count: number }[]) => {
@@ -114,21 +117,21 @@ export function SpecialDayHeatMap({
         if (bucket.startDay === bucket.endDay) {
             const day = Math.abs(bucket.startDay);
             if (isOnDay) {
-                return "On the day";
+                return t('specialDays.onTheDay');
             } else if (isBefore) {
-                return `${day} day${day !== 1 ? 's' : ''} before`;
+                return t('specialDays.daysBefore', { day });
             } else {
-                return `${day} day${day !== 1 ? 's' : ''} after`;
+                return t('specialDays.daysAfter', { day });
             }
         } else {
             const startDay = Math.abs(bucket.startDay);
             const endDay = Math.abs(bucket.endDay);
             if (isBefore) {
-                return `${startDay}-${endDay} days before`;
+                return t('specialDays.dayRangeBefore', { start: startDay, end: endDay });
             } else if (isAfter) {
-                return `${startDay}-${endDay} days after`;
+                return t('specialDays.dayRangeAfter', { start: startDay, end: endDay });
             } else {
-                return `${startDay}-${endDay} days around`;
+                return t('specialDays.dayRangeAround', { start: startDay, end: endDay });
             }
         }
     };
@@ -141,21 +144,21 @@ export function SpecialDayHeatMap({
                     data: birthdayDataCustomer,
                     buckets: birthdayCustomerBuckets,
                     minMax: birthdayCustomerMinMax,
-                    label: "Customer's Own Birthday",
+                    labelKey: 'specialDays.customerOwnBirthday',
                 };
             case 'importantPersonBirthday':
                 return {
                     data: birthdayDataImportantPerson,
                     buckets: birthdayImportantBuckets,
                     minMax: birthdayImportantMinMax,
-                    label: "Important Person's Birthday",
+                    labelKey: 'specialDays.importantPersonBirthday',
                 };
             case 'anniversary':
                 return {
                     data: anniversaryData,
                     buckets: anniversaryBuckets,
                     minMax: anniversaryMinMax,
-                    label: "Anniversary",
+                    labelKey: 'specialDays.anniversary',
                 };
         }
     };
@@ -165,15 +168,15 @@ export function SpecialDayHeatMap({
     return (
         <Card className="mb-8">
             <CardHeader>
-                <CardTitle>Special Day Sales Correlation</CardTitle>
+                <CardTitle>{t('specialDays.title')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                    Revenue activity relative to special days (negative = before, positive = after)
+                    {t('specialDays.description')}
                 </p>
             </CardHeader>
             <CardContent>
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-sm text-muted-foreground">Event Type:</span>
+                        <span className="text-sm text-muted-foreground">{t('specialDays.eventType')}</span>
                         <ToggleGroup
                             type="single"
                             value={selectedType}
@@ -181,21 +184,21 @@ export function SpecialDayHeatMap({
                         >
                             <ToggleGroupItem
                                 value="customerBirthday"
-                                aria-label="Customer's Own Birthday"
+                                aria-label={t('specialDays.customerOwnBirthday')}
                             >
-                                Customer's Birthday
+                                {t('specialDays.customerBirthday')}
                             </ToggleGroupItem>
                             <ToggleGroupItem
                                 value="importantPersonBirthday"
-                                aria-label="Important Person's Birthday"
+                                aria-label={t('specialDays.importantPersonBirthday')}
                             >
-                                Important Birthday
+                                {t('specialDays.importantBirthday')}
                             </ToggleGroupItem>
                             <ToggleGroupItem
                                 value="anniversary"
-                                aria-label="Anniversary"
+                                aria-label={t('specialDays.anniversary')}
                             >
-                                Anniversary
+                                {t('specialDays.anniversary')}
                             </ToggleGroupItem>
                         </ToggleGroup>
                     </div>
@@ -206,13 +209,13 @@ export function SpecialDayHeatMap({
                     {hoveredBucket ? (
                         <p className="text-sm text-foreground">
                             <span className="font-semibold">{hoveredBucket.dayText}</span>{" "}
-                            <span className="font-semibold">{hoveredBucket.type}</span> has{" "}
-                            <span className="font-semibold">¥{hoveredBucket.revenue.toLocaleString('ja-JP')}</span> revenue{" "}
-                            <span className="text-muted-foreground">({hoveredBucket.percentile}th percentile)</span>
+                            <span className="font-semibold">{t(selectedData.labelKey)}</span> {t('specialDays.hasRevenue')}{" "}
+                            <span className="font-semibold">{formatCurrency(hoveredBucket.revenue)}</span>{" "}
+                            <span className="text-muted-foreground">({t('charts.percentile', { value: hoveredBucket.percentile })})</span>
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic">
-                            Hover over a bucket to see details
+                            {t('specialDays.hoverToSeeDetails')}
                         </p>
                     )}
                 </div>
@@ -241,14 +244,14 @@ export function SpecialDayHeatMap({
                                         }}
                                         onMouseEnter={() => setHoveredBucket({
                                             dayText,
-                                            type: selectedData.label,
+                                            type: selectedData.labelKey,
                                             revenue: Math.round(avgValue),
                                             percentile,
                                         })}
                                         onMouseLeave={() => setHoveredBucket(null)}
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {Math.round(avgValue).toLocaleString()}
+                                            {formatNumber(Math.round(avgValue))}
                                         </div>
                                     </div>
                                 );
@@ -271,18 +274,17 @@ export function SpecialDayHeatMap({
 
                 {/* Legend */}
                 <div className="mt-4 flex items-center gap-4 text-sm">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Cold (Less)</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.coldLess')}</span>
                     <div className="flex-1 h-6 rounded" style={{
                         background: 'linear-gradient(to right, rgb(0, 100, 255), rgb(0, 255, 200), rgb(255, 255, 0), rgb(255, 155, 0), rgb(255, 0, 0))',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
                     }} />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Hot (More)</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.hotMore')}</span>
                     <span className="ml-auto text-gray-500 dark:text-gray-400 text-xs">
-                        Each heatmap normalized independently
+                        {t('specialDays.normalizedIndependently')}
                     </span>
                 </div>
             </CardContent>
         </Card>
     );
 }
-

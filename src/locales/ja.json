@@ -1,0 +1,257 @@
+{
+  "common": {
+    "loading": "売上データを読み込み中...",
+    "error": "エラー",
+    "checkConsole": "詳細についてはコンソールを確認してください。",
+    "noData": "データなし",
+    "unknown": "不明",
+    "previous": "前へ",
+    "next": "次へ",
+    "page": "ページ",
+    "of": "/",
+    "clear": "クリア",
+    "high": "高",
+    "low": "低",
+    "revenue": "売上",
+    "customers": "顧客",
+    "view": "表示",
+    "time": "期間",
+    "metric": "指標"
+  },
+  "header": {
+    "title": "Jouete分析",
+    "tabs": {
+      "sales": "売上",
+      "customers": "顧客",
+      "product": "商品",
+      "stores": "店舗",
+      "employees": "従業員"
+    }
+  },
+  "kpis": {
+    "totalRevenue": "総売上",
+    "totalTransactions": "総取引数",
+    "averageOrderValue": "平均注文金額",
+    "activeCustomers": "アクティブ顧客数"
+  },
+  "filters": {
+    "title": "フィルター",
+    "clearFilters": "フィルターをクリア",
+    "startDate": "開始日",
+    "endDate": "終了日",
+    "categoryStoreComingSoon": "カテゴリーと店舗のフィルターは近日公開予定"
+  },
+  "temporal": {
+    "salesTrends": "売上トレンド",
+    "granularity": {
+      "daily": "日次",
+      "weekly": "週次",
+      "monthly": "月次"
+    },
+    "dayOfWeek": {
+      "title": "曜日別売上",
+      "revenue": "売上"
+    },
+    "birthday": {
+      "title": "誕生日と売上の相関",
+      "description": "誕生日を基準とした売上活動（負の値 = 誕生日前、正の値 = 誕生日後）",
+      "birthday": "誕生日",
+      "customerBirthday": "顧客の誕生日",
+      "importantPerson": "大切な人の誕生日",
+      "hoverToSeeDetails": "バケットにマウスを乗せて詳細を確認",
+      "daysBefore": "日前",
+      "daysAfter": "日後",
+      "noDataAvailable": "誕生日データがありません"
+    }
+  },
+  "rfm": {
+    "title": "顧客セグメンテーション",
+    "descriptions": {
+      "revenue": "このセグメントの顧客が生み出した総売上。売上が高いほど、より価値の高い顧客グループを示します。",
+      "aov": "平均注文金額（AOV）は、このセグメントの顧客1人あたりの平均支出額を表します。AOVが高いほど、顧客は取引あたりにより多くを支出することを示します。",
+      "customers": "このセグメントの顧客数。顧客数が多いほど、このカテゴリーの顧客基盤が大きいことを示します。"
+    },
+    "metrics": {
+      "revenue": "売上",
+      "aov": "AOV",
+      "customers": "顧客"
+    },
+    "recency": {
+      "mostRecent": "最新",
+      "recent": "最近",
+      "lessRecent": "やや古い",
+      "leastRecent": "最も古い",
+      "days": "日",
+      "day": "日"
+    },
+    "frequency": {
+      "high": "高頻度",
+      "mediumHigh": "中高頻度",
+      "mediumLow": "中低頻度",
+      "low": "低頻度",
+      "transactions": "回の取引",
+      "transaction": "回の取引"
+    },
+    "colorScale": "カラースケール:",
+    "colorScaleDescriptions": {
+      "revenue": "緑 = 高売上、赤 = 低売上",
+      "aov": "緑 = 高AOV、赤 = 低AOV",
+      "customers": "緑 = 顧客数多、赤 = 顧客数少"
+    },
+    "tooltips": {
+      "noDataAvailable": "このセグメントにデータがありません",
+      "generatedRevenue": "{{rLabel}} / {{fLabel}}の顧客が総売上¥{{revenue}}Mを生み出しました。これは全顧客の{{percentage}}%を表します。",
+      "aovDescription": "{{rLabel}} / {{fLabel}}の顧客の平均注文金額は¥{{aov}}です。総売上：¥{{revenue}}M（{{count}}人の顧客から）。",
+      "customerCount": "{{rLabel}} / {{fLabel}}セグメントには{{count}}人の顧客（全体の{{percentage}}%）が含まれています。彼らは¥{{revenue}}Mの売上を生み出しました。"
+    }
+  },
+  "segmentation": {
+    "title": "高度な顧客セグメンテーション",
+    "lifetimeValueTitle": "生涯価値による顧客セグメンテーション",
+    "description": "ターゲットマーケティングとインサイトのために、顧客ベースをセグメント化するさまざまな方法を探索",
+    "dimension": "セグメンテーションディメンション",
+    "types": {
+      "frequency": "購入頻度",
+      "age": "年齢",
+      "gender": "性別",
+      "channel": "チャネル設定",
+      "aov": "平均注文金額",
+      "lifetimeValue": "生涯価値"
+    },
+    "distribution": "分布",
+    "revenueBySegment": "セグメント別売上",
+    "totalRevenue": "総売上:",
+    "aov": "AOV:",
+    "ltv": "LTV:",
+    "customers": "人の顧客",
+    "percentage": "パーセンテージ:",
+    "count": "件数:",
+    "segmentLabels": {
+      "Very Frequent (10+ purchases)": "高頻度（10回以上）",
+      "Frequent (5-9 purchases)": "頻繁（5〜9回）",
+      "Regular (2-4 purchases)": "通常（2〜4回）",
+      "One-Time (1 purchase)": "1回限り（1回）",
+      "Active (0-30 days)": "アクティブ（0〜30日）",
+      "Recent (31-90 days)": "最近（31〜90日）",
+      "At Risk (91-180 days)": "リスク（91〜180日）",
+      "Inactive (180+ days)": "非アクティブ（180日以上）",
+      "Online Only": "オンラインのみ",
+      "Mixed (Online & Store)": "混在（オンライン&店舗）",
+      "Store Only": "店舗のみ",
+      "High AOV (>¥15,000)": "高AOV（¥15,000超）",
+      "Medium AOV (¥8,000-15,000)": "中AOV（¥8,000〜15,000）",
+      "Low AOV (<¥8,000)": "低AOV（¥8,000未満）",
+      "Under 20": "20歳未満",
+      "20-29": "20〜29歳",
+      "30-39": "30〜39歳",
+      "40-49": "40〜49歳",
+      "50-59": "50〜59歳",
+      "60-69": "60〜69歳",
+      "70+": "70歳以上",
+      "Unknown": "不明",
+      "Male": "男性",
+      "Female": "女性",
+      "Other": "その他"
+    }
+  },
+  "product": {
+    "performance": {
+      "title": "上位25の{{type}}の店舗別パフォーマンス"
+    },
+    "trends": {
+      "title": "上位25の{{type}}の時系列トレンド"
+    },
+    "types": {
+      "product": "商品",
+      "collection": "コレクション",
+      "category": "カテゴリー",
+      "color": "色",
+      "material": "素材"
+    },
+    "granularity": {
+      "weekly": "週次",
+      "monthly": "月次"
+    }
+  },
+  "stores": {
+    "performance": {
+      "title": "上位25店舗の商品別パフォーマンス"
+    },
+    "trends": {
+      "title": "上位店舗の時系列トレンド"
+    }
+  },
+  "employees": {
+    "title": "従業員の売上パフォーマンス",
+    "description": "総売上収益でランク付けされた全従業員（商品内訳付き）",
+    "store": "店舗:",
+    "allStores": "全店舗",
+    "perPage": "ページあたり:",
+    "showing": "{{start}}件から{{end}}件を表示（全{{total}}人の従業員中）"
+  },
+  "charts": {
+    "revenue": "売上",
+    "percentile": "{{value}}パーセンタイル",
+    "customers": "人の顧客",
+    "noDataAvailable": "データがありません",
+    "quantity": "数量",
+    "transactions": "取引",
+    "others": "その他",
+    "products": "件の商品",
+    "avg": "平均",
+    "count": "件数:",
+    "totalRevenue": "総売上:",
+    "avgPerCustomer": "顧客1人あたり平均:",
+    "percentage": "パーセンテージ:",
+    "ofTotal": "全体のうち"
+  },
+  "specialDays": {
+    "title": "特別な日と売上の相関",
+    "description": "特別な日を基準とした売上活動（負の値 = 前、正の値 = 後）",
+    "eventType": "イベントタイプ:",
+    "customerBirthday": "顧客の誕生日",
+    "importantBirthday": "大切な人の誕生日",
+    "anniversary": "記念日",
+    "importantPersonBirthday": "大切な人の誕生日",
+    "customerOwnBirthday": "顧客の誕生日",
+    "hoverToSeeDetails": "バケットにマウスを乗せて詳細を確認",
+    "hasRevenue": "の売上",
+    "noDataAvailable": "特別な日のデータがありません",
+    "onTheDay": "当日",
+    "onTheBirthday": "誕生日当日",
+    "dayBefore": "{{day}}日前",
+    "daysBefore": "{{day}}日前",
+    "dayAfter": "{{day}}日後",
+    "daysAfter": "{{day}}日後",
+    "dayRangeBefore": "{{start}}-{{end}}日前",
+    "dayRangeAfter": "{{start}}-{{end}}日後",
+    "dayRangeAround": "{{start}}-{{end}}日前後",
+    "coldLess": "低（少ない）",
+    "hotMore": "高（多い）",
+    "max": "最大",
+    "min": "最小",
+    "normalizedIndependently": "各ヒートマップは個別に正規化"
+  },
+  "anniversary": {
+    "title": "記念日と売上の相関",
+    "description": "記念日を基準とした売上活動（負の値 = 記念日前、正の値 = 記念日後）",
+    "noDataAvailable": "記念日データがありません"
+  },
+  "performance": {
+    "hoverOver": "{{type}}のバーにマウスを乗せると",
+    "hoverOverBar": "バーにマウスを乗せると",
+    "toSeeBreakdown": "{{breakdownType}}の内訳が表示されます",
+    "storeBreakdown": "店舗内訳:",
+    "productBreakdown": "商品内訳:",
+    "products": "商品:",
+    "selectStore": "店舗を選択",
+    "selectAStore": "-- 店舗を選択 --",
+    "pleaseSelect": "パフォーマンスを表示する{{type}}を選択してください",
+    "byProduct": "商品別",
+    "byStore": "店舗別"
+  },
+  "brandCollection": {
+    "topBrands": "上位ブランドのパフォーマンス",
+    "topCollections": "上位コレクションのパフォーマンス"
+  }
+}

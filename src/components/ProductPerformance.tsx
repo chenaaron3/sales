@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { BreakdownPanel } from './BreakdownPanel';
@@ -17,12 +18,13 @@ const STORE_COLORS = [
 ];
 
 export function ProductPerformanceChart({ data, viewType }: ProductPerformanceProps) {
+    const { t } = useTranslation();
     const [hoveredItem, setHoveredItem] = useState<PerformanceWithStoreBreakdown | null>(null);
 
     if (data.length === 0) {
         return (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">No data available</p>
+                <p className="text-gray-500 dark:text-gray-400">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -58,6 +60,8 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
             setHoveredItem(entry.originalItem);
         }
     };
+
+    const typeLabel = viewType === 'product' ? t('product.types.product') : t('product.types.collection');
 
     return (
         <div className="flex gap-6 -mx-6">
@@ -126,10 +130,10 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
                 itemColors={STORE_COLORS}
                 itemList={storeList}
                 emptyMessage={{
-                    primary: `Hover over a ${viewType === 'product' ? 'product' : 'collection'} bar`,
-                    secondary: 'to see store breakdown',
+                    primary: t('performance.hoverOver', { type: typeLabel }),
+                    secondary: t('performance.toSeeBreakdown', { breakdownType: '店舗' }),
                 }}
-                itemLabel="Store Breakdown:"
+                itemLabel={t('performance.storeBreakdown')}
             />
         </div>
     );

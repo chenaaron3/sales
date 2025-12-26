@@ -1,11 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { formatCurrency } from '../utils/i18n';
 
 import type { DayOfWeekData } from '../types';
 
+interface DayOfWeekAnalysisProps {
+    data: DayOfWeekData[];
+    metric: 'revenue';
+}
+
 // Custom tooltip component
-const CustomTooltip = ({ active, payload, label, data }: any) => {
+const CustomTooltip = ({ active, payload, label, data, t }: any) => {
     if (active && payload && payload.length) {
         const revenue = payload[0].value as number;
 
@@ -21,10 +28,10 @@ const CustomTooltip = ({ active, payload, label, data }: any) => {
             <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{label}</p>
                 <p className="text-sm text-gray-900 dark:text-white">
-                    Revenue: <span className="font-semibold">¥{revenue.toLocaleString('ja-JP')}</span>
+                    {t('charts.revenue')}: <span className="font-semibold">{formatCurrency(revenue)}</span>
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {percentile}th percentile
+                    {t('charts.percentile', { value: percentile })}
                 </p>
             </div>
         );
@@ -32,17 +39,14 @@ const CustomTooltip = ({ active, payload, label, data }: any) => {
     return null;
 };
 
-interface DayOfWeekAnalysisProps {
-    data: DayOfWeekData[];
-    metric: 'revenue';
-}
-
 export function DayOfWeekAnalysisChart({ data, metric }: DayOfWeekAnalysisProps) {
+    const { t } = useTranslation();
+
     return (
         <Card className="mb-8">
             <CardHeader>
                 <CardTitle>
-                    Sales by Day of Week
+                    {t('temporal.dayOfWeek.title')}
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -51,8 +55,8 @@ export function DayOfWeekAnalysisChart({ data, metric }: DayOfWeekAnalysisProps)
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="day" />
                         <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
-                        <Tooltip content={<CustomTooltip data={data} />} />
-                        <Bar dataKey={metric} fill="#8884d8" name="Revenue" />
+                        <Tooltip content={<CustomTooltip data={data} t={t} />} />
+                        <Bar dataKey={metric} fill="#8884d8" name={t('charts.revenue')} />
                     </BarChart>
                 </ResponsiveContainer>
             </CardContent>

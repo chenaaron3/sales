@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { EmployeePerformanceChart } from './EmployeePerformanceChart';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -13,6 +14,7 @@ const DEFAULT_ITEMS_PER_PAGE = 25;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
+    const { t } = useTranslation();
     const [selectedStore, setSelectedStore] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState<number>(DEFAULT_ITEMS_PER_PAGE);
@@ -67,20 +69,20 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                 <CardHeader>
                     <div className="flex items-center justify-between mb-2">
                         <div>
-                            <CardTitle className="text-2xl">Employee Sales Performance</CardTitle>
+                            <CardTitle className="text-2xl">{t('employees.title')}</CardTitle>
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                All employees ranked by total sales revenue, with product breakdown
+                                {t('employees.description')}
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-gray-700 dark:text-gray-300">Store:</label>
+                                <label className="text-sm text-gray-700 dark:text-gray-300">{t('employees.store')}</label>
                                 <select
                                     value={selectedStore}
                                     onChange={(e) => handleStoreChange(e.target.value)}
                                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
-                                    <option value="all">All Stores</option>
+                                    <option value="all">{t('employees.allStores')}</option>
                                     {allStores.map((store) => (
                                         <option key={store} value={store}>
                                             {store}
@@ -89,7 +91,7 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                                 </select>
                             </div>
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+                                <label className="text-sm text-gray-700 dark:text-gray-300">{t('employees.perPage')}</label>
                                 <select
                                     value={itemsPerPage}
                                     onChange={(e) => handleItemsPerPageChange(e.target.value)}
@@ -112,7 +114,11 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                     {totalPages > 1 && (
                         <div className="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} employees
+                                {t('employees.showing', {
+                                    start: ((currentPage - 1) * itemsPerPage) + 1,
+                                    end: Math.min(currentPage * itemsPerPage, filteredData.length),
+                                    total: filteredData.length
+                                })}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -120,17 +126,17 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                                     disabled={currentPage === 1}
                                     className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Previous
+                                    {t('common.previous')}
                                 </button>
                                 <div className="text-sm text-gray-700 dark:text-gray-300">
-                                    Page {currentPage} of {totalPages}
+                                    {t('common.page')} {currentPage} {t('common.of')} {totalPages}
                                 </div>
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
                                     className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Next
+                                    {t('common.next')}
                                 </button>
                             </div>
                         </div>

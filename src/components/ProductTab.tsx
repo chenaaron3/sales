@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { AttributeTrendsChart } from './AttributeTrends';
 import { ProductPerformanceChart } from './ProductPerformance';
@@ -42,15 +43,16 @@ export function ProductTab({
     colorTrends,
     materialTrends,
 }: ProductTabProps) {
+    const { t } = useTranslation();
     const [viewType, setViewType] = useState<ViewType>('product');
     const [granularity, setGranularity] = useState<Granularity>('monthly');
 
-    const viewTypeLabels: Record<ViewType, string> = {
-        product: 'Product',
-        collection: 'Collection',
-        category: 'Category',
-        color: 'Color',
-        material: 'Material',
+    const viewTypeLabelKeys: Record<ViewType, string> = {
+        product: 'product.types.product',
+        collection: 'product.types.collection',
+        category: 'product.types.category',
+        color: 'product.types.color',
+        material: 'product.types.material',
     };
 
     // Determine which data to show based on view type
@@ -92,10 +94,10 @@ export function ProductTab({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>
-                            Top 25 {viewTypeLabels[viewType]}s Performance by Store
+                            {t('product.performance.title', { type: t(viewTypeLabelKeys[viewType]) })}
                         </CardTitle>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-muted-foreground">View:</span>
+                            <span className="text-sm text-muted-foreground">{t('common.view')}:</span>
                             <ToggleGroup
                                 type="single"
                                 value={viewType}
@@ -107,7 +109,7 @@ export function ProductTab({
                                         value={type}
                                         aria-label={`${type} view`}
                                     >
-                                        {viewTypeLabels[type]}
+                                        {t(viewTypeLabelKeys[type])}
                                     </ToggleGroupItem>
                                 ))}
                             </ToggleGroup>
@@ -127,11 +129,11 @@ export function ProductTab({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>
-                            {viewTypeLabels[viewType]} Trends Over Time
+                            {t('product.trends.title', { type: t(viewTypeLabelKeys[viewType]) })}
                         </CardTitle>
                         {(viewType === 'product' || viewType === 'collection') && (
                             <div className="flex items-center gap-3">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Time:</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">{t('common.time')}:</span>
                                 <ToggleGroup
                                     type="single"
                                     value={granularity}
@@ -143,7 +145,7 @@ export function ProductTab({
                                             value={g}
                                             aria-label={`${g} granularity`}
                                         >
-                                            {g.charAt(0).toUpperCase() + g.slice(1)}
+                                            {t(`product.granularity.${g}`)}
                                         </ToggleGroupItem>
                                     ))}
                                 </ToggleGroup>

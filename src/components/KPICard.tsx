@@ -1,3 +1,4 @@
+import { formatCurrency, formatNumber, getLocale } from '../utils/i18n';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 interface KPICardProps {
@@ -11,13 +12,14 @@ export function KPICard({ title, value, format = 'number', trend }: KPICardProps
     const formatValue = (val: number | string) => {
         if (typeof val === 'string') return val;
 
+        const locale = getLocale();
         switch (format) {
             case 'currency':
-                return `¥${val.toLocaleString('ja-JP')}`;
+                return formatCurrency(val);
             case 'decimal':
-                return val.toFixed(2);
+                return val.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             default:
-                return val.toLocaleString('ja-JP');
+                return formatNumber(val);
         }
     };
 

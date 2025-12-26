@@ -1,13 +1,17 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
-import type { BirthdaySalesData } from "../types";
-import type { BirthdayType } from "../utils/dataAnalysis";
+import { formatCurrency, formatNumber } from '../utils/i18n';
+import type { BirthdaySalesData } from '../types';
+
+type BirthdayType = 'customer' | 'importantPerson';
+
 interface BirthdayHeatMapProps {
     data: BirthdaySalesData[];
-    metric: "revenue";
+    metric: 'salesCount' | 'revenue' | 'transactions';
     birthdayType: BirthdayType;
     onBirthdayTypeChange?: (type: BirthdayType) => void;
 }
@@ -18,6 +22,18 @@ export function BirthdayHeatMap({
     birthdayType,
     onBirthdayTypeChange
 }: BirthdayHeatMapProps) {
+    const { t } = useTranslation();
+
+    if (data.length === 0) {
+        return (
+            <Card className="mb-8">
+                <CardContent className="pt-6">
+                    <p className="text-gray-500 dark:text-gray-400">{t('temporal.birthday.noDataAvailable')}</p>
+                </CardContent>
+            </Card>
+        );
+    }
+
     const [hoveredBucket, setHoveredBucket] = useState<{
         dayText: string;
         birthdayTypeText: string;
@@ -25,62 +41,9 @@ export function BirthdayHeatMap({
         percentile: number;
     } | null>(null);
 
-    if (data.length === 0) {
-        return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">No birthday data available</p>
-            </div>
-        );
-    }
-
-    // Find max value for normalization
-    const maxValue = Math.max(...data.map((d) => d[metric]));
-    const minValue = Math.min(...data.map((d) => d[metric]));
-
-    // Helper function to get color intensity
-    const getColorIntensity = (value: number) => {
-        if (maxValue === 0) return 0;
-        return (value - minValue) / (maxValue - minValue || 1);
-    };
-
-    // Helper function to get color with high contrast
-    // Blue (cold/low sales) -> Cyan -> Yellow -> Orange -> Red (hot/high sales)
-    const getColor = (intensity: number) => {
-        if (intensity < 0.25) {
-            // Blue to cyan (cold)
-            const t = intensity / 0.25;
-            const r = Math.floor(0);
-            const g = Math.floor(100 + 155 * t);
-            const b = Math.floor(255 - 55 * t);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else if (intensity < 0.5) {
-            // Cyan to yellow
-            const t = (intensity - 0.25) / 0.25;
-            const r = Math.floor(0 + 255 * t);
-            const g = Math.floor(255);
-            const b = Math.floor(200 - 200 * t);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else if (intensity < 0.75) {
-            // Yellow to orange
-            const t = (intensity - 0.5) / 0.25;
-            const r = Math.floor(255);
-            const g = Math.floor(255 - 100 * t);
-            const b = Math.floor(0);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else {
-            // Orange to red (hot)
-            const t = (intensity - 0.75) / 0.25;
-            const r = Math.floor(255);
-            const g = Math.floor(155 - 155 * t);
-            const b = Math.floor(0);
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-    };
-
-    // Group data into buckets for better visualization (e.g., 5-day buckets)
-    const bucketSize = 3; // 3-day buckets
+    // Group data into buckets for better visualization
+    const bucketSize = 3;
     const buckets: { startDay: number; endDay: number; value: number; count: number }[] = [];
-
     for (let i = 0; i < data.length; i += bucketSize) {
         const chunk = data.slice(i, i + bucketSize);
         const startDay = chunk[0]?.daysFromBirthday ?? 0;
@@ -89,21 +52,61 @@ export function BirthdayHeatMap({
         buckets.push({ startDay, endDay, value, count: chunk.length });
     }
 
+    // Calculate min/max for normalization
+    const avgValues = buckets.map(b => b.value / b.count);
+    const minValue = Math.min(...avgValues);
+    const maxValue = Math.max(...avgValues);
+
+    // Helper function to get color intensity (normalized)
+    const getColorIntensity = (value: number) => {
+        if (maxValue === 0 || maxValue === minValue) return 0;
+        return (value - minValue) / (maxValue - minValue);
+    };
+
+    // Helper function to get color with high contrast
+    const getColor = (intensity: number) => {
+        if (intensity < 0.25) {
+            const t = intensity / 0.25;
+            const r = Math.floor(0);
+            const g = Math.floor(100 + 155 * t);
+            const b = Math.floor(255 - 55 * t);
+            return `rgb(${r}, ${g}, ${b})`;
+        } else if (intensity < 0.5) {
+            const t = (intensity - 0.25) / 0.25;
+            const r = Math.floor(0 + 255 * t);
+            const g = Math.floor(255);
+            const b = Math.floor(200 - 200 * t);
+            return `rgb(${r}, ${g}, ${b})`;
+        } else if (intensity < 0.75) {
+            const t = (intensity - 0.5) / 0.25;
+            const r = Math.floor(255);
+            const g = Math.floor(255 - 100 * t);
+            const b = Math.floor(0);
+            return `rgb(${r}, ${g}, ${b})`;
+        } else {
+            const t = (intensity - 0.75) / 0.25;
+            const r = Math.floor(255);
+            const g = Math.floor(155 - 155 * t);
+            const b = Math.floor(0);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    };
+
 
     return (
         <Card className="mb-8">
             <CardHeader>
                 <CardTitle>
-                    Birthday Sales Correlation
+                    {t('temporal.birthday.title')}
                 </CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Revenue activity relative to birthdays (negative = before birthday, positive = after)
+                    {t('temporal.birthday.description')}
                 </p>
             </CardHeader>
             <CardContent>
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Birthday:</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('temporal.birthday.birthday')}:</span>
                         <ToggleGroup
                             type="single"
                             value={birthdayType}
@@ -113,11 +116,11 @@ export function BirthdayHeatMap({
                                 <ToggleGroupItem
                                     key={type}
                                     value={type}
-                                    aria-label={type === "customer" ? "Customer's Own Birthday" : "Important Person's Birthday"}
+                                    aria-label={type === "customer" ? t('temporal.birthday.customerBirthday') : t('temporal.birthday.importantPerson')}
                                 >
                                     {type === "customer"
-                                        ? "Customer's Birthday"
-                                        : "Important Person's"}
+                                        ? t('temporal.birthday.customerBirthday')
+                                        : t('temporal.birthday.importantPerson')}
                                 </ToggleGroupItem>
                             ))}
                         </ToggleGroup>
@@ -129,13 +132,13 @@ export function BirthdayHeatMap({
                     {hoveredBucket ? (
                         <p className="text-sm text-gray-900 dark:text-white">
                             <span className="font-semibold">{hoveredBucket.dayText}</span>{" "}
-                            <span className="font-semibold">{hoveredBucket.birthdayTypeText}</span> has{" "}
-                            <span className="font-semibold">¥{hoveredBucket.revenue.toLocaleString('ja-JP')}</span> revenue{" "}
-                            <span className="text-gray-600 dark:text-gray-400">({hoveredBucket.percentile}th percentile)</span>
+                            <span className="font-semibold">{hoveredBucket.birthdayTypeText}</span> {t('specialDays.hasRevenue')}{" "}
+                            <span className="font-semibold">{formatCurrency(hoveredBucket.revenue)}</span>{" "}
+                            <span className="text-gray-600 dark:text-gray-400">({t('charts.percentile', { value: hoveredBucket.percentile })})</span>
                         </p>
                     ) : (
                         <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                            Hover over a bucket to see details
+                            {t('temporal.birthday.hoverToSeeDetails')}
                         </p>
                     )}
                 </div>
@@ -143,7 +146,7 @@ export function BirthdayHeatMap({
                 <div className="overflow-x-auto">
                     <div className="flex gap-1 mb-2" style={{ minWidth: "800px" }}>
                         {buckets.map((bucket, index) => {
-                            const intensity = getColorIntensity(bucket.value);
+                            const intensity = getColorIntensity(bucket.value / bucket.count);
                             const color = getColor(intensity);
                             const avgValue = bucket.value / bucket.count;
 
@@ -157,32 +160,31 @@ export function BirthdayHeatMap({
                             if (bucket.startDay === bucket.endDay) {
                                 const day = Math.abs(bucket.startDay);
                                 if (isOnBirthday) {
-                                    dayText = "On the birthday";
+                                    dayText = t('specialDays.onTheBirthday');
                                 } else if (isBefore) {
-                                    dayText = `${day} day${day !== 1 ? 's' : ''} before`;
+                                    dayText = t('specialDays.daysBefore', { day });
                                 } else {
-                                    dayText = `${day} day${day !== 1 ? 's' : ''} after`;
+                                    dayText = t('specialDays.daysAfter', { day });
                                 }
                             } else {
                                 const startDay = Math.abs(bucket.startDay);
                                 const endDay = Math.abs(bucket.endDay);
                                 if (isBefore) {
-                                    dayText = `${startDay}-${endDay} days before`;
+                                    dayText = t('specialDays.dayRangeBefore', { start: startDay, end: endDay });
                                 } else if (isAfter) {
-                                    dayText = `${startDay}-${endDay} days after`;
+                                    dayText = t('specialDays.dayRangeAfter', { start: startDay, end: endDay });
                                 } else {
-                                    dayText = `${startDay}-${endDay} days around`;
+                                    dayText = t('specialDays.dayRangeAround', { start: startDay, end: endDay });
                                 }
                             }
 
-                            const birthdayTypeText = birthdayType === "customer"
-                                ? "Customer's Own Birthday"
-                                : "Important Person's Birthday";
-
-                            // Calculate percentile
                             const percentile = maxValue === minValue
                                 ? 100
                                 : Math.round(((avgValue - minValue) / (maxValue - minValue)) * 100);
+
+                            const birthdayTypeText = birthdayType === "customer"
+                                ? t('temporal.birthday.customerBirthday')
+                                : t('temporal.birthday.importantPerson');
 
                             return (
                                 <div
@@ -202,7 +204,7 @@ export function BirthdayHeatMap({
                                     onMouseLeave={() => setHoveredBucket(null)}
                                 >
                                     <div className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {Math.round(avgValue).toLocaleString()}
+                                        {formatNumber(Math.round(avgValue))}
                                     </div>
                                 </div>
                             );
@@ -226,14 +228,14 @@ export function BirthdayHeatMap({
 
                 {/* Legend */}
                 <div className="mt-4 flex items-center gap-4 text-sm">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Cold (Less)</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.coldLess')}</span>
                     <div className="flex-1 h-6 rounded" style={{
                         background: 'linear-gradient(to right, rgb(0, 100, 255), rgb(0, 255, 200), rgb(255, 255, 0), rgb(255, 155, 0), rgb(255, 0, 0))',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
                     }} />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Hot (More)</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.hotMore')}</span>
                     <span className="ml-auto text-gray-500 dark:text-gray-400 text-xs">
-                        Max: {maxValue.toLocaleString()} | Min: {minValue.toLocaleString()}
+                        {t('specialDays.max')}: {formatNumber(maxValue)} | {t('specialDays.min')}: {formatNumber(minValue)}
                     </span>
                 </div>
             </CardContent>

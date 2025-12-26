@@ -2,6 +2,7 @@ import {
     CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
+import { formatCurrency } from '../utils/i18n';
 import type { AttributeTrend } from '../types';
 
 interface AttributeTrendsProps {
@@ -9,42 +10,42 @@ interface AttributeTrendsProps {
     attribute: 'color' | 'material';
 }
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-        // Sort payload by value in descending order
-        const sortedPayload = [...payload].sort((a, b) => {
-            const aValue = a.value as number || 0;
-            const bValue = b.value as number || 0;
-            return bValue - aValue;
-        });
-
-        return (
-            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
-                <div className="space-y-1">
-                    {sortedPayload.map((entry: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <div
-                                className="w-3 h-3 rounded-sm"
-                                style={{ backgroundColor: entry.color }}
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-                                {entry.name}:
-                            </span>
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                ¥{(entry.value as number || 0).toLocaleString('ja-JP')}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-    return null;
-};
-
 export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
+    // Custom tooltip component
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            // Sort payload by value in descending order
+            const sortedPayload = [...payload].sort((a, b) => {
+                const aValue = a.value as number || 0;
+                const bValue = b.value as number || 0;
+                return bValue - aValue;
+            });
+
+            return (
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
+                    <div className="space-y-1">
+                        {sortedPayload.map((entry: any, index: number) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <div
+                                    className="w-3 h-3 rounded-sm"
+                                    style={{ backgroundColor: entry.color }}
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                    {entry.name}:
+                                </span>
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {formatCurrency(entry.value as number || 0)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     // Get all unique attributes
     const allAttributes = new Set<string>();
     data.forEach((entry) => {
@@ -96,4 +97,3 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
         </ResponsiveContainer>
     );
 }
-

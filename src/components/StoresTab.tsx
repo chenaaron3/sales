@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { StorePerformanceChart } from './StorePerformance';
 import { StoreTrendsChart } from './StoreTrendsChart';
@@ -18,6 +19,7 @@ export function StoresTab({
     storeTrendsWeekly,
     storeTrendsMonthly,
 }: StoresTabProps) {
+    const { t } = useTranslation();
     const [granularity, setGranularity] = useState<Granularity>('monthly');
 
     const storeTrends = granularity === 'weekly'
@@ -29,7 +31,7 @@ export function StoresTab({
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        Top 25 Stores Performance by Product
+                        {t('stores.performance.title')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -41,10 +43,10 @@ export function StoresTab({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>
-                            Top Stores Trends Over Time
+                            {t('stores.trends.title')}
                         </CardTitle>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Time:</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{t('common.time')}:</span>
                             <ToggleGroup
                                 type="single"
                                 value={granularity}
@@ -56,7 +58,7 @@ export function StoresTab({
                                         value={g}
                                         aria-label={`${g} granularity`}
                                     >
-                                        {g.charAt(0).toUpperCase() + g.slice(1)}
+                                        {t(`product.granularity.${g}`)}
                                     </ToggleGroupItem>
                                 ))}
                             </ToggleGroup>

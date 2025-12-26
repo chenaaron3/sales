@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { BreakdownPanel } from './BreakdownPanel';
@@ -16,12 +17,13 @@ const PRODUCT_COLORS = [
 ];
 
 export function StorePerformanceChart({ data }: StorePerformanceProps) {
+    const { t } = useTranslation();
     const [hoveredItem, setHoveredItem] = useState<PerformanceWithStoreBreakdown | null>(null);
 
     if (data.length === 0) {
         return (
             <div className="flex items-center justify-center h-64">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-muted-foreground">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -126,10 +128,10 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
                 itemColors={PRODUCT_COLORS}
                 itemList={productList}
                 emptyMessage={{
-                    primary: 'Hover over a store bar',
-                    secondary: 'to see product breakdown',
+                    primary: t('performance.hoverOver', { type: t('header.tabs.stores') }),
+                    secondary: t('performance.toSeeBreakdown', { breakdownType: '商品' }),
                 }}
-                itemLabel="Product Breakdown:"
+                itemLabel={t('performance.productBreakdown')}
             />
         </div>
     );

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { loadPrecomputedData } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
@@ -12,6 +13,7 @@ import { TemporalTab } from './TemporalTab';
 
 type TabType = 'customers' | 'product' | 'sales' | 'stores' | 'employees';
 export function Dashboard() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('sales');
@@ -43,7 +45,7 @@ export function Dashboard() {
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading sales data...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -53,8 +55,8 @@ export function Dashboard() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
-                    <p className="text-red-600 dark:text-red-400 mb-4">Error: {error}</p>
-                    <p className="text-gray-600 dark:text-gray-400">Please check the console for details.</p>
+                    <p className="text-red-600 dark:text-red-400 mb-4">{t('common.error')}: {error}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('common.checkConsole')}</p>
                 </div>
             </div>
         );

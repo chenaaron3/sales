@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import {
     CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
+import { formatCurrency } from '../utils/i18n';
 import type { ProductTrend, CollectionTrend } from '../types';
 import type { Granularity } from '../utils/dataAnalysis';
 
@@ -18,48 +20,49 @@ const COLORS = [
     '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'
 ];
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-        // Sort payload by value in descending order
-        const sortedPayload = [...payload].sort((a, b) => {
-            const aValue = a.value as number || 0;
-            const bValue = b.value as number || 0;
-            return bValue - aValue;
-        });
-
-        return (
-            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
-                <div className="space-y-1">
-                    {sortedPayload.map((entry: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <div
-                                className="w-3 h-3 rounded-sm"
-                                style={{ backgroundColor: entry.color }}
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-                                {entry.name}:
-                            </span>
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                ¥{(entry.value as number || 0).toLocaleString('ja-JP')}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-    return null;
-};
-
 export function ProductTrendsChart({ productData, collectionData, viewType }: ProductTrendsChartProps) {
+    const { t } = useTranslation();
     const data = viewType === 'product' ? productData : collectionData;
+
+    // Custom tooltip component
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            // Sort payload by value in descending order
+            const sortedPayload = [...payload].sort((a, b) => {
+                const aValue = a.value as number || 0;
+                const bValue = b.value as number || 0;
+                return bValue - aValue;
+            });
+
+            return (
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
+                    <div className="space-y-1">
+                        {sortedPayload.map((entry: any, index: number) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <div
+                                    className="w-3 h-3 rounded-sm"
+                                    style={{ backgroundColor: entry.color }}
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                    {entry.name}:
+                                </span>
+                                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {formatCurrency(entry.value as number || 0)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
 
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-64">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-muted-foreground">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }

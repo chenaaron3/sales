@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { BreakdownPanel } from './BreakdownPanel';
@@ -17,12 +18,13 @@ const PRODUCT_COLORS = [
 ];
 
 export function EmployeePerformanceChart({ data }: EmployeePerformanceChartProps) {
+    const { t } = useTranslation();
     const [hoveredItem, setHoveredItem] = useState<EmployeePerformance | null>(null);
 
     if (!data || data.length === 0) {
         return (
             <div className="flex items-center justify-center h-64">
-                <p className="text-muted-foreground">No data available</p>
+                <p className="text-muted-foreground">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -46,7 +48,7 @@ export function EmployeePerformanceChart({ data }: EmployeePerformanceChartProps
             const processedProducts = [...top10Products];
             if (othersRevenue > 0) {
                 processedProducts.push({
-                    productName: 'Others',
+                    productName: t('charts.others'),
                     revenue: othersRevenue,
                 });
             }
@@ -164,10 +166,10 @@ export function EmployeePerformanceChart({ data }: EmployeePerformanceChartProps
                 itemColors={PRODUCT_COLORS}
                 itemList={productList}
                 emptyMessage={{
-                    primary: 'Hover over a bar',
-                    secondary: 'to see product breakdown',
+                    primary: t('performance.hoverOverBar'),
+                    secondary: t('performance.toSeeBreakdown', { breakdownType: '商品' }),
                 }}
-                itemLabel="Products:"
+                itemLabel={t('performance.products')}
             />
         </div>
     );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { SalesRecord } from '../types';
 
@@ -13,6 +14,7 @@ interface FiltersProps {
 }
 
 export function Filters({ onFilterChange }: FiltersProps) {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState('2024-07-01'); // Default to Q3 2024
   const [endDate, setEndDate] = useState('');
 
@@ -46,20 +48,20 @@ export function Filters({ onFilterChange }: FiltersProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('filters.title')}</h2>
         {(startDate || endDate) && (
           <button
             onClick={handleClearFilters}
             className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
           >
-            Clear Filters
+            {t('filters.clearFilters')}
           </button>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Start Date
+            {t('filters.startDate')}
           </label>
           <input
             type="date"
@@ -70,7 +72,7 @@ export function Filters({ onFilterChange }: FiltersProps) {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            End Date
+            {t('filters.endDate')}
           </label>
           <input
             type="date"
@@ -82,7 +84,7 @@ export function Filters({ onFilterChange }: FiltersProps) {
       </div>
       <div className="mt-4">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Category and store filters coming soon
+          {t('filters.categoryStoreComingSoon')}
         </p>
       </div>
     </div>
