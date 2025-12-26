@@ -32,7 +32,7 @@ export function SpecialDayHeatMap({
         return (
             <Card className="mb-8">
                 <CardContent className="pt-6">
-                    <p className="text-gray-500 dark:text-gray-400">No special day data available</p>
+                    <p className="text-muted-foreground">No special day data available</p>
                 </CardContent>
             </Card>
         );
@@ -166,14 +166,14 @@ export function SpecialDayHeatMap({
         <Card className="mb-8">
             <CardHeader>
                 <CardTitle>Special Day Sales Correlation</CardTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                     Revenue activity relative to special days (negative = before, positive = after)
                 </p>
             </CardHeader>
             <CardContent>
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Event Type:</span>
+                        <span className="text-sm text-muted-foreground">Event Type:</span>
                         <ToggleGroup
                             type="single"
                             value={selectedType}
@@ -202,16 +202,16 @@ export function SpecialDayHeatMap({
                 </div>
 
                 {/* Info Display */}
-                <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[60px] flex items-center">
+                <div className="mb-4 p-3 bg-muted rounded-lg border border-border min-h-[60px] flex items-center">
                     {hoveredBucket ? (
-                        <p className="text-sm text-gray-900 dark:text-white">
+                        <p className="text-sm text-foreground">
                             <span className="font-semibold">{hoveredBucket.dayText}</span>{" "}
                             <span className="font-semibold">{hoveredBucket.type}</span> has{" "}
                             <span className="font-semibold">¥{hoveredBucket.revenue.toLocaleString('ja-JP')}</span> revenue{" "}
-                            <span className="text-gray-600 dark:text-gray-400">({hoveredBucket.percentile}th percentile)</span>
+                            <span className="text-muted-foreground">({hoveredBucket.percentile}th percentile)</span>
                         </p>
                     ) : (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                        <p className="text-sm text-muted-foreground italic">
                             Hover over a bucket to see details
                         </p>
                     )}
@@ -254,7 +254,7 @@ export function SpecialDayHeatMap({
                                 );
                             })}
                         </div>
-                        <div className="flex gap-1 text-xs text-gray-600 dark:text-gray-400" style={{ minWidth: "800px" }}>
+                        <div className="flex gap-1 text-xs text-muted-foreground" style={{ minWidth: "800px" }}>
                             {selectedData.buckets.map((bucket, index) => {
                                 if (index % Math.ceil(selectedData.buckets.length / 10) !== 0 && index !== selectedData.buckets.length - 1) {
                                     return <div key={index} className="flex-1 min-w-[20px]" />;

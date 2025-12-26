@@ -120,12 +120,12 @@ export function AdvancedCustomerSegmentation({
                                         if (!props.active || !props.payload?.[0]) return null;
                                         const data = props.payload[0].payload;
                                         return (
-                                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded shadow-lg">
-                                                <p className="font-semibold text-gray-900 dark:text-white">{data.segment}</p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <div className="bg-card p-3 border border-border rounded shadow-lg">
+                                                <p className="font-semibold text-card-foreground">{data.segment}</p>
+                                                <p className="text-sm text-muted-foreground">
                                                     Count: {data.count.toLocaleString('ja-JP')}
                                                 </p>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                <p className="text-sm text-muted-foreground">
                                                     Percentage: {data.percentage.toFixed(1)}%
                                                 </p>
                                             </div>
@@ -153,40 +153,40 @@ export function AdvancedCustomerSegmentation({
                                         // Calculate LTV: average lifetime value per customer = totalRevenue / customerCount
                                         const ltv = data.count > 0 ? data.totalRevenue / data.count : 0;
                                         return (
-                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                                                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{data.segment}</p>
+                                            <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+                                                <p className="text-sm font-semibold text-card-foreground mb-2">{data.segment}</p>
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2">
                                                         <div
                                                             className="w-3 h-3 rounded-sm"
                                                             style={{ backgroundColor: data.fill }}
                                                         />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                        <span className="text-sm text-muted-foreground flex-1">
                                                             Total Revenue:
                                                         </span>
-                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        <span className="text-sm font-semibold text-card-foreground">
                                                             ¥{data.totalRevenue.toLocaleString('ja-JP')}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'transparent' }} />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                        <span className="text-sm text-muted-foreground flex-1">
                                                             AOV:
                                                         </span>
-                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        <span className="text-sm font-semibold text-card-foreground">
                                                             ¥{Math.round(data.averageRevenue).toLocaleString('ja-JP')}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'transparent' }} />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                        <span className="text-sm text-muted-foreground flex-1">
                                                             LTV:
                                                         </span>
-                                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        <span className="text-sm font-semibold text-card-foreground">
                                                             ¥{Math.round(ltv).toLocaleString('ja-JP')}
                                                         </span>
                                                     </div>
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400 pt-1">
+                                                    <div className="text-xs text-muted-foreground pt-1">
                                                         {data.count.toLocaleString('ja-JP')} customers ({data.percentage.toFixed(1)}%)
                                                     </div>
                                                 </div>
