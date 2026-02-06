@@ -20,9 +20,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/en" replace />} />
+        <Route path="/" element={<Navigate to="/ja" replace />} />
         <Route path="/:lang" element={<Dashboard />} />
-        <Route path="*" element={<Navigate to="/en" replace />} />
+        <Route path="*" element={<Navigate to="/ja" replace />} />
       </Routes>
     </BrowserRouter>
   );
