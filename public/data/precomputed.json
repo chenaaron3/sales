@@ -67227,8 +67227,8 @@
       "percentage": 0.5176961698700829,
       "segments": [],
       "recencyRange": {
-        "min": 384,
-        "max": 541
+        "min": 434,
+        "max": 591
       },
       "frequencyRange": {
         "min": 1,
@@ -67245,8 +67245,8 @@
       "percentage": 11.75663349576393,
       "segments": [],
       "recencyRange": {
-        "min": 384,
-        "max": 541
+        "min": 434,
+        "max": 591
       },
       "frequencyRange": {
         "min": 1,
@@ -67286,8 +67286,8 @@
         }
       ],
       "recencyRange": {
-        "min": 384,
-        "max": 541
+        "min": 434,
+        "max": 591
       },
       "frequencyRange": {
         "min": 2,
@@ -67304,8 +67304,8 @@
       "percentage": 5.296113991766166,
       "segments": [],
       "recencyRange": {
-        "min": 384,
-        "max": 541
+        "min": 434,
+        "max": 591
       },
       "frequencyRange": {
         "min": 2,
@@ -67345,8 +67345,8 @@
         }
       ],
       "recencyRange": {
-        "min": 304,
-        "max": 384
+        "min": 354,
+        "max": 434
       },
       "frequencyRange": {
         "min": 1,
@@ -67363,8 +67363,8 @@
       "percentage": 6.915763437502568,
       "segments": [],
       "recencyRange": {
-        "min": 304,
-        "max": 384
+        "min": 354,
+        "max": 434
       },
       "frequencyRange": {
         "min": 1,
@@ -67381,8 +67381,8 @@
       "percentage": 8.263416959069133,
       "segments": [],
       "recencyRange": {
-        "min": 304,
-        "max": 384
+        "min": 354,
+        "max": 434
       },
       "frequencyRange": {
         "min": 2,
@@ -67411,8 +67411,8 @@
         }
       ],
       "recencyRange": {
-        "min": 304,
-        "max": 384
+        "min": 354,
+        "max": 434
       },
       "frequencyRange": {
         "min": 2,
@@ -67429,8 +67429,8 @@
       "percentage": 10.590584503627982,
       "segments": [],
       "recencyRange": {
-        "min": 208,
-        "max": 304
+        "min": 258,
+        "max": 354
       },
       "frequencyRange": {
         "min": 1,
@@ -67447,8 +67447,8 @@
       "percentage": 0.0016434799043494696,
       "segments": [],
       "recencyRange": {
-        "min": 208,
-        "max": 304
+        "min": 258,
+        "max": 354
       },
       "frequencyRange": {
         "min": 1,
@@ -67477,8 +67477,8 @@
         }
       ],
       "recencyRange": {
-        "min": 208,
-        "max": 304
+        "min": 258,
+        "max": 354
       },
       "frequencyRange": {
         "min": 2,
@@ -67495,8 +67495,8 @@
       "percentage": 6.504893461415201,
       "segments": [],
       "recencyRange": {
-        "min": 208,
-        "max": 304
+        "min": 258,
+        "max": 354
       },
       "frequencyRange": {
         "min": 2,
@@ -67536,8 +67536,8 @@
         }
       ],
       "recencyRange": {
-        "min": 129,
-        "max": 208
+        "min": 179,
+        "max": 258
       },
       "frequencyRange": {
         "min": 1,
@@ -67554,8 +67554,8 @@
       "percentage": 6.326575891793283,
       "segments": [],
       "recencyRange": {
-        "min": 129,
-        "max": 208
+        "min": 179,
+        "max": 258
       },
       "frequencyRange": {
         "min": 1,
@@ -67572,8 +67572,8 @@
       "percentage": 1.405997058170971,
       "segments": [],
       "recencyRange": {
-        "min": 129,
-        "max": 208
+        "min": 179,
+        "max": 258
       },
       "frequencyRange": {
         "min": 2,
@@ -67602,8 +67602,8 @@
         }
       ],
       "recencyRange": {
-        "min": 129,
-        "max": 208
+        "min": 179,
+        "max": 258
       },
       "frequencyRange": {
         "min": 2,
@@ -67644,52 +67644,52 @@
   "ageSegments": [
     {
       "segment": "Under 20",
-      "count": 835,
-      "totalRevenue": 14050745,
-      "averageRevenue": 8309.133648728563,
-      "percentage": 0.6861528600659035
+      "count": 721,
+      "totalRevenue": 12280645,
+      "averageRevenue": 8325.861016949153,
+      "percentage": 0.5924745055179838
     },
     {
       "segment": "20-29",
-      "count": 33769,
-      "totalRevenue": 586359439,
-      "averageRevenue": 8868.110087719298,
-      "percentage": 27.74933644498862
+      "count": 33450,
+      "totalRevenue": 580261166,
+      "averageRevenue": 8858.408127747924,
+      "percentage": 27.487201400244878
     },
     {
       "segment": "30-39",
-      "count": 18191,
-      "totalRevenue": 368246763,
-      "averageRevenue": 9820.175551348037,
-      "percentage": 14.948271470010601
+      "count": 18494,
+      "totalRevenue": 373496536,
+      "averageRevenue": 9812.072402469461,
+      "percentage": 15.197258675519546
     },
     {
       "segment": "40-49",
-      "count": 8822,
-      "totalRevenue": 202468330,
-      "averageRevenue": 10162.54228780806,
-      "percentage": 7.24938985808551
+      "count": 8866,
+      "totalRevenue": 203306530,
+      "averageRevenue": 10164.818259087046,
+      "percentage": 7.285546415981199
     },
     {
       "segment": "50-59",
-      "count": 6738,
-      "totalRevenue": 156337080,
-      "averageRevenue": 9947.005153655278,
-      "percentage": 5.5368837977533625
+      "count": 6775,
+      "totalRevenue": 156958880,
+      "averageRevenue": 9939.138804457953,
+      "percentage": 5.567288175983828
     },
     {
       "segment": "60-69",
-      "count": 2454,
-      "totalRevenue": 56633400,
-      "averageRevenue": 9894.025157232705,
-      "percentage": 2.016549842636799
+      "count": 2492,
+      "totalRevenue": 57567100,
+      "averageRevenue": 9887.85640673308,
+      "percentage": 2.0477759608194392
     },
     {
       "segment": "70+",
-      "count": 287,
-      "totalRevenue": 6485500,
-      "averageRevenue": 10117.784711388456,
-      "percentage": 0.23583936627414886
+      "count": 298,
+      "totalRevenue": 6710400,
+      "averageRevenue": 10229.268292682927,
+      "percentage": 0.24487850574807096
     },
     {
       "segment": "Unknown",

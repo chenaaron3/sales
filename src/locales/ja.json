@@ -18,6 +18,13 @@
     "time": "期間",
     "metric": "指標"
   },
+  "sidebar": {
+    "collapse": "折りたたむ"
+  },
+  "dashboard": {
+    "welcome": "ダッシュボードへようこそ。",
+    "welcomeSub": "下にスクロールして売上概要、顧客分析、分析結果をご確認ください。"
+  },
   "header": {
     "title": "Jouete分析",
     "tabs": {

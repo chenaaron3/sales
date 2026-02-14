@@ -18,6 +18,13 @@
     "time": "Time",
     "metric": "Metric"
   },
+  "sidebar": {
+    "collapse": "Collapse"
+  },
+  "dashboard": {
+    "welcome": "Welcome back to the Dashboard.",
+    "welcomeSub": "Scroll down to see sales overview, customer insights, and analytics."
+  },
   "header": {
     "title": "Jouete Analysis",
     "tabs": {

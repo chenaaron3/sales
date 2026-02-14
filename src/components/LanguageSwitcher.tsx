@@ -9,7 +9,6 @@ export function LanguageSwitcher() {
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
 
-    // Update URL to reflect language change
     const path = location.pathname;
     const pathWithoutLang = path.replace(/^\/(en|ja)/, '') || '/';
     const newPath = `/${lng}${pathWithoutLang}`;
@@ -24,7 +23,7 @@ export function LanguageSwitcher() {
     <button
       type="button"
       onClick={() => changeLanguage(switchToLanguage)}
-      className="px-3 py-1.5 text-lg rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      className="p-2.5 rounded-lg text-white/90 hover:bg-white/15 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[var(--color-nifty-nav)] text-base"
       aria-label={`Switch to ${switchToLanguage === 'en' ? 'English' : 'Japanese'}`}
     >
       {switchToFlag}

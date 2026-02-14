@@ -46,44 +46,45 @@ export function Filters({ onFilterChange }: FiltersProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('filters.title')}</h2>
+    <div className="bg-card rounded-lg shadow-sm p-6 border border-border mb-8">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-base font-semibold text-card-foreground">{t('filters.title')}</h2>
         {(startDate || endDate) && (
           <button
+            type="button"
             onClick={handleClearFilters}
-            className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="text-sm font-medium text-[var(--color-primary)] hover:underline focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
           >
             {t('filters.clearFilters')}
           </button>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-card-foreground mb-2">
             {t('filters.startDate')}
           </label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => handleDateChange('startDate', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-4 py-2.5 border border-input rounded-lg bg-background text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-card-foreground mb-2">
             {t('filters.endDate')}
           </label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => handleDateChange('endDate', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-4 py-2.5 border border-input rounded-lg bg-background text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
           />
         </div>
       </div>
-      <div className="mt-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-5">
+        <p className="text-sm text-muted-foreground">
           {t('filters.categoryStoreComingSoon')}
         </p>
       </div>

@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { loadPrecomputedData } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
 import { EmployeesTab } from './EmployeesTab';
-import { Header } from './Header';
 import { KPIs } from './KPIs';
+import { Navbar } from './Navbar';
 import { ProductTab } from './ProductTab';
+import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar';
 import { StoresTab } from './StoresTab';
 import { TemporalTab } from './TemporalTab';
 
@@ -17,6 +18,7 @@ export function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('sales');
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [precomputedData, setPrecomputedData] = useState<any>(null);
 
     useEffect(() => {
@@ -42,10 +44,10 @@ export function Dashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
+                    <p className="text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -53,10 +55,10 @@ export function Dashboard() {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+            <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="text-center">
                     <p className="text-red-600 dark:text-red-400 mb-4">{t('common.error')}: {error}</p>
-                    <p className="text-gray-600 dark:text-gray-400">{t('common.checkConsole')}</p>
+                    <p className="text-muted-foreground">{t('common.checkConsole')}</p>
                 </div>
             </div>
         );
@@ -102,13 +104,30 @@ export function Dashboard() {
         employeePerformance,
     } = precomputedData;
 
+    const mainMarginLeft = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+
     return (
         <div className="min-h-screen bg-background">
-            <Header activeTab={activeTab} onTabChange={setActiveTab} />
-
-            <div className="container py-8">
-                <div className="mx-auto">
-                    {/* Tab Content */}
+            <Sidebar
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+            />
+            <main
+                className="flex flex-col min-h-screen min-w-0 transition-[margin] duration-200"
+                style={{ marginLeft: mainMarginLeft }}
+            >
+                <Navbar />
+                <div className="flex-1 p-6 lg:p-8 overflow-auto">
+                    <section className="mb-8">
+                        <h2 className="text-xl font-semibold text-foreground mb-1">
+                            {t('dashboard.welcome')}
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            {t('dashboard.welcomeSub')}
+                        </p>
+                    </section>
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
@@ -116,7 +135,6 @@ export function Dashboard() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.2 }}
-                            className="mt-8"
                         >
                             {activeTab === 'sales' && (
                                 <>
@@ -179,7 +197,7 @@ export function Dashboard() {
                         </motion.div>
                     </AnimatePresence>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
