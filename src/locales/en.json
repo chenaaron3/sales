@@ -27,6 +27,7 @@
   },
   "header": {
     "title": "Jouete Analysis",
+    "titleMark": "Dashboard",
     "tabs": {
       "sales": "Sales",
       "customers": "Customers",

@@ -74,39 +74,17 @@ export function SpecialDayHeatMap({
     const birthdayImportantMinMax = getMinMaxFromBuckets(birthdayImportantBuckets);
     const anniversaryMinMax = getMinMaxFromBuckets(anniversaryBuckets);
 
-    // Helper function to get color intensity (normalized to specific min/max)
+    // Helper: normalized intensity 0–1 for min/max
     const getColorIntensity = (value: number, min: number, max: number) => {
         if (max === 0 || max === min) return 0;
         return (value - min) / (max - min);
     };
 
-    // Helper function to get color with high contrast
-    const getColor = (intensity: number) => {
-        if (intensity < 0.25) {
-            const t = intensity / 0.25;
-            const r = Math.floor(0);
-            const g = Math.floor(100 + 155 * t);
-            const b = Math.floor(255 - 55 * t);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else if (intensity < 0.5) {
-            const t = (intensity - 0.25) / 0.25;
-            const r = Math.floor(0 + 255 * t);
-            const g = Math.floor(255);
-            const b = Math.floor(200 - 200 * t);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else if (intensity < 0.75) {
-            const t = (intensity - 0.5) / 0.25;
-            const r = Math.floor(255);
-            const g = Math.floor(255 - 100 * t);
-            const b = Math.floor(0);
-            return `rgb(${r}, ${g}, ${b})`;
-        } else {
-            const t = (intensity - 0.75) / 0.25;
-            const r = Math.floor(255);
-            const g = Math.floor(155 - 155 * t);
-            const b = Math.floor(0);
-            return `rgb(${r}, ${g}, ${b})`;
-        }
+    // Map intensity to theme palette class (same scale as RFM: teal = high, destructive = low)
+    const getColorClass = (intensity: number) => {
+        if (intensity <= 0) return 'rfm-cell-0';
+        const step = Math.min(9, Math.floor(intensity * 9) + 1);
+        return `rfm-cell-${step}`;
     };
 
     const getDayText = (bucket: { startDay: number; endDay: number }) => {
@@ -227,7 +205,7 @@ export function SpecialDayHeatMap({
                             {selectedData.buckets.map((bucket, index) => {
                                 const avgValue = bucket.value / bucket.count;
                                 const intensity = getColorIntensity(avgValue, selectedData.minMax.min, selectedData.minMax.max);
-                                const color = getColor(intensity);
+                                const colorClass = getColorClass(intensity);
                                 const dayText = getDayText(bucket);
                                 const percentile = selectedData.minMax.max === selectedData.minMax.min
                                     ? 100
@@ -236,12 +214,8 @@ export function SpecialDayHeatMap({
                                 return (
                                     <div
                                         key={`${selectedType}-${index}`}
-                                        className="flex-1 min-w-[20px] relative group cursor-pointer"
-                                        style={{
-                                            backgroundColor: color,
-                                            height: "60px",
-                                            border: "1px solid rgba(0,0,0,0.1)",
-                                        }}
+                                        className={`flex-1 min-w-[20px] relative group cursor-pointer border border-border ${colorClass}`}
+                                        style={{ height: '60px' }}
                                         onMouseEnter={() => setHoveredBucket({
                                             dayText,
                                             type: selectedData.labelKey,
@@ -250,8 +224,10 @@ export function SpecialDayHeatMap({
                                         })}
                                         onMouseLeave={() => setHoveredBucket(null)}
                                     >
-                                        <div className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                            {formatNumber(Math.round(avgValue))}
+                                        <div className="absolute inset-0 flex items-center justify-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span className="bg-black/60 text-white rounded px-1.5 py-0.5">
+                                                {formatNumber(Math.round(avgValue))}
+                                            </span>
                                         </div>
                                     </div>
                                 );
@@ -272,15 +248,12 @@ export function SpecialDayHeatMap({
                     </div>
                 </div>
 
-                {/* Legend */}
+                {/* Legend – theme teal (low) to destructive (high) */}
                 <div className="mt-4 flex items-center gap-4 text-sm">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.coldLess')}</span>
-                    <div className="flex-1 h-6 rounded" style={{
-                        background: 'linear-gradient(to right, rgb(0, 100, 255), rgb(0, 255, 200), rgb(255, 255, 0), rgb(255, 155, 0), rgb(255, 0, 0))',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                    }} />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">{t('specialDays.hotMore')}</span>
-                    <span className="ml-auto text-gray-500 dark:text-gray-400 text-xs">
+                    <span className="text-muted-foreground font-medium">{t('specialDays.coldLess')}</span>
+                    <div className="flex-1 h-6 rounded border border-border rfm-legend-bar" />
+                    <span className="text-muted-foreground font-medium">{t('specialDays.hotMore')}</span>
+                    <span className="ml-auto text-muted-foreground text-xs">
                         {t('specialDays.normalizedIndependently')}
                     </span>
                 </div>

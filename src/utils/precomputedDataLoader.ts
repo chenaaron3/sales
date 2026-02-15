@@ -1,4 +1,9 @@
+/** Data source used to build this precomputed file; drives UI branding (e.g. "Jouete" vs "Mark"). */
+export type DataSourceId = "jouete" | "mark";
+
 export interface PrecomputedData {
+  /** Which CSV source was used; default "jouete" for backward compatibility. */
+  dataSource?: DataSourceId;
   kpis: any;
   trendDataDaily: any[];
   trendDataWeekly: any[];
@@ -35,6 +40,8 @@ export interface PrecomputedData {
   channelSegments: any[];
   aovSegments: any[];
   employeePerformance: any[];
+  /** Optional: store–customer rank data (e.g. when using Mark data source). */
+  storeCustomerRanks?: any[];
 }
 
 let cachedData: PrecomputedData | null = null;
@@ -68,10 +75,12 @@ export async function loadPrecomputedData(): Promise<PrecomputedData> {
     );
   }
 
+  const inferredSource = data.dataSource ?? (Array.isArray(data.storeCustomerRanks) && data.storeCustomerRanks.length > 0 ? 'mark' : 'jouete');
   console.log("✅ Precomputed data loaded successfully:", {
     kpis: !!data.kpis,
     trends: data.trendDataMonthly?.length || 0,
     productTrends: data.productTrendsMonthly?.length || 0,
+    dataSource: data.dataSource ?? '(inferred: ' + inferredSource + ')',
     totalKeys: Object.keys(data).length,
   });
 

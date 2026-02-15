@@ -3,6 +3,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { formatCurrency } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 
 import type { DayOfWeekData } from '../types';
 
@@ -25,12 +26,12 @@ const CustomTooltip = ({ active, payload, label, data, t }: any) => {
             : Math.round(((revenue - minRevenue) / (maxRevenue - minRevenue)) * 100);
 
         return (
-            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{label}</p>
-                <p className="text-sm text-gray-900 dark:text-white">
+            <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+                <p className="text-sm font-semibold text-card-foreground mb-1">{label}</p>
+                <p className="text-sm text-card-foreground">
                     {t('charts.revenue')}: <span className="font-semibold">{formatCurrency(revenue)}</span>
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                     {t('charts.percentile', { value: percentile })}
                 </p>
             </div>
@@ -56,7 +57,7 @@ export function DayOfWeekAnalysisChart({ data, metric }: DayOfWeekAnalysisProps)
                         <XAxis dataKey="day" />
                         <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
                         <Tooltip content={<CustomTooltip data={data} t={t} />} />
-                        <Bar dataKey={metric} fill="#8884d8" name={t('charts.revenue')} />
+                        <Bar dataKey={metric} fill={SEGMENT_COLORS[0]} name={t('charts.revenue')} />
                     </BarChart>
                 </ResponsiveContainer>
             </CardContent>

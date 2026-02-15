@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 
 import { formatCurrency, formatNumber } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { BrandCollectionPerformance } from '../types';
 
 interface BrandCollectionChartProps {
@@ -12,15 +13,15 @@ interface BrandCollectionChartProps {
     type: 'brand' | 'collection';
 }
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8'];
+const COLORS = SEGMENT_COLORS;
 
 export function BrandCollectionChart({ data, metric, type }: BrandCollectionChartProps) {
     const { t } = useTranslation();
 
     if (data.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">{t('charts.noDataAvailable')}</p>
+            <div className="bg-card rounded-lg shadow-md p-6 border border-border mb-8">
+                <p className="text-muted-foreground">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -49,8 +50,8 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
         : t('brandCollection.topCollections');
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="bg-card rounded-lg shadow-md p-6 border border-border mb-8">
+            <h2 className="text-xl font-bold text-card-foreground mb-4">
                 {title} ({t(`charts.${metric}`)})
             </h2>
             <ResponsiveContainer width="100%" height={400}>
@@ -71,7 +72,7 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
                         }}
                     />
                     <Legend />
-                    <Bar dataKey={metric} fill="#8884d8" name={t(`charts.${metric}`)}>
+                    <Bar dataKey={metric} fill={COLORS[0]} name={t(`charts.${metric}`)}>
                         {chartData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
@@ -80,11 +81,11 @@ export function BrandCollectionChart({ data, metric, type }: BrandCollectionChar
             </ResponsiveContainer>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 {top10.slice(0, 4).map((item, index) => (
-                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div className="font-semibold text-gray-900 dark:text-white text-xs mb-1">
+                    <div key={index} className="p-3 bg-muted rounded-lg border border-border">
+                        <div className="font-semibold text-card-foreground text-xs mb-1">
                             {item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name}
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                        <div className="text-xs text-muted-foreground">
                             {formatNumber(item.productCount)} {t('charts.products')} • {t('charts.avg')}: {formatCurrency(Math.round(item.averagePrice))}
                         </div>
                     </div>

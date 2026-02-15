@@ -2,11 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DataSourceProvider } from '../contexts/DataSourceContext';
 import { loadPrecomputedData } from '../utils/precomputedDataLoader';
+import type { DataSourceId } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
 import { EmployeesTab } from './EmployeesTab';
 import { KPIs } from './KPIs';
-import { Navbar } from './Navbar';
 import { ProductTab } from './ProductTab';
 import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar';
 import { StoresTab } from './StoresTab';
@@ -41,6 +42,16 @@ export function Dashboard() {
         loadData();
     }, []);
 
+    // Set document (tab) title from data source and current language
+    useEffect(() => {
+        if (!precomputedData) return;
+        const ds: DataSourceId =
+            precomputedData.dataSource ??
+            (Array.isArray(precomputedData.storeCustomerRanks) && precomputedData.storeCustomerRanks.length > 0
+                ? 'mark'
+                : 'jouete');
+        document.title = t(ds === 'mark' ? 'header.titleMark' : 'header.title');
+    }, [precomputedData, t]);
 
     if (loading) {
         return (
@@ -68,7 +79,12 @@ export function Dashboard() {
         return null;
     }
 
-    // Use precomputed data directly
+    // Use precomputed data directly; infer Mark if storeCustomerRanks present (only Mark adds it)
+    const dataSource: DataSourceId =
+        precomputedData.dataSource ??
+        (Array.isArray(precomputedData.storeCustomerRanks) && precomputedData.storeCustomerRanks.length > 0
+            ? 'mark'
+            : 'jouete');
     const {
         kpis,
         trendDataDaily,
@@ -107,6 +123,7 @@ export function Dashboard() {
     const mainMarginLeft = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
     return (
+        <DataSourceProvider dataSource={dataSource}>
         <div className="min-h-screen bg-background">
             <Sidebar
                 activeTab={activeTab}
@@ -118,7 +135,6 @@ export function Dashboard() {
                 className="flex flex-col min-h-screen min-w-0 transition-[margin] duration-200"
                 style={{ marginLeft: mainMarginLeft }}
             >
-                <Navbar />
                 <div className="flex-1 p-6 lg:p-8 overflow-auto">
                     <section className="mb-8">
                         <h2 className="text-xl font-semibold text-foreground mb-1">
@@ -199,5 +215,6 @@ export function Dashboard() {
                 </div>
             </main>
         </div>
+        </DataSourceProvider>
     );
 }

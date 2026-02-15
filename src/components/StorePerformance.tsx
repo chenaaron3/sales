@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { BreakdownPanel } from './BreakdownPanel';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 
 import type { PerformanceWithStoreBreakdown } from '../types';
 
@@ -10,11 +11,7 @@ interface StorePerformanceProps {
     data: PerformanceWithStoreBreakdown[];
 }
 
-const PRODUCT_COLORS = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-    '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8',
-    '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'
-];
+const PRODUCT_COLORS = SEGMENT_COLORS;
 
 export function StorePerformanceChart({ data }: StorePerformanceProps) {
     const { t } = useTranslation();
@@ -87,8 +84,7 @@ export function StorePerformanceChart({ data }: StorePerformanceProps) {
                                             y={0}
                                             dy={3}
                                             textAnchor="start"
-                                            fill="#000000"
-                                            className="dark:fill-white"
+                                            fill="var(--color-foreground)"
                                             fontSize={14}
                                             fontWeight="bold"
                                         >

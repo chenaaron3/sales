@@ -1,92 +1,84 @@
-import Papa from 'papaparse';
+import Papa from "papaparse";
+import type { DataSourceId } from "./csvMappers";
+import {
+  mapJoueteSalesRow,
+  mapJoueteMemberRow,
+  mapMarkSalesRow,
+  mapMarkMemberRow,
+} from "./csvMappers";
+import type { SalesRecord, MemberRecord } from "../types";
 
-export function parseSalesCSV(csvText: string): any[] {
-  // Skip the first line (it's just "sales_jouete_1y")
+type RawRow = Record<string, string | undefined>;
+
+/**
+ * Parses sales CSV text into the common SalesRecord[] model.
+ * @param csvText - Raw CSV string (with header row)
+ * @param dataSource - Which export format: "jouete" (default) or "mark"
+ */
+export function parseSalesCSV(
+  csvText: string,
+  dataSource: DataSourceId = "jouete"
+): SalesRecord[] {
   const lines = csvText.split("\n");
-  const csvWithoutFirstLine = lines.slice(1).join("\n");
-
-  const results = Papa.parse(csvWithoutFirstLine, {
+  const csvContent =
+    dataSource === "jouete" ? lines.slice(1).join("\n") : lines.join("\n");
+  const results = Papa.parse<RawRow>(csvContent, {
     header: true,
     skipEmptyLines: true,
   });
-
-  // Transform Japanese headers to English property names
-  const transformed = results.data
-    .map((row: any) => ({
-      recordUpdateDate: row["レコード更新日時"] || "",
-      recordAddDate: row["レコード追加日時"] || "",
-      memberId: row["jouete会員番号"] || "",
-      transactionNumber: row["取引通番"] || "",
-      purchaseDate: row["購入日付"] || "",
-      cardNumber: row["カード番号"] || "",
-      productCode: row["商品コード"] || "",
-      productName: row["商品名"] || "",
-      quantity: parseFloat(row["数量"] || "0"),
-      unitPrice: parseFloat(row["単価"] || "0"),
-      amount: parseFloat(row["金額"] || "0"),
-      storeCode: row["店舗コード"] || "",
-      storeName: row["店舗名"] || "",
-      staffCode: row["担当者コード"] || "",
-      staffName: row["担当者名"] || "",
-      brand: row["ブランド"] || "",
-      collectionCode: row["コレクションコード"] || "",
-      collectionName: row["コレクション名"] || "",
-      productCategoryCode: row["商品分類"] || "",
-      productCategoryName: row["商品分類名"] || "",
-      itemCode: row["アイテムコード"] || "",
-      itemName: row["アイテム名"] || "",
-      materialCode: row["素材コード"] || "",
-      materialName: row["素材名"] || "",
-      colorCode: row["カラーコード"] || "",
-      colorName: row["カラー名"] || "",
-      transactionType: row["取引名"] || "",
-    }))
-    .filter((row: any) => row.memberId && row.purchaseDate);
-
-  return transformed;
+  const mapper = dataSource === "jouete" ? mapJoueteSalesRow : mapMarkSalesRow;
+  return results.data
+    .map((row) => mapper(row))
+    .filter((r) => r.memberId && r.purchaseDate);
 }
 
-export function parseMemberCSV(csvText: string): any[] {
-  const results = Papa.parse(csvText, {
+/**
+ * Parses member CSV text into the common MemberRecord[] model.
+ * @param csvText - Raw CSV string (with header row)
+ * @param dataSource - Which export format: "jouete" (default) or "mark"
+ */
+export function parseMemberCSV(
+  csvText: string,
+  dataSource: DataSourceId = "jouete"
+): MemberRecord[] {
+  const results = Papa.parse<RawRow>(csvText, {
     header: true,
     skipEmptyLines: true,
   });
-
-  const transformed = results.data
-    .map((row: any) => ({
-      memberId: row["jouete会員番号"] || "",
-      birthDate: row["生年月日"] || null,
-      gender: row["性別"] || null,
-      newsletterFlag: row["メルマガ希望フラグ"] || "",
-      dmFlag: row["DM送付希望フラグ"] || "",
-      favoriteStore: row["お気に入り店舗"] || null,
-      importantPersonBirthday: row["大事な方のお誕生日"] || null,
-      anniversary: row["記念日"] || null,
-      firstRegisteredStore: row["初回登録店舗"] || null,
-    }))
-    .filter((row: any) => row.memberId);
-
-  return transformed;
+  const mapper = dataSource === "jouete" ? mapJoueteMemberRow : mapMarkMemberRow;
+  return results.data.map((row) => mapper(row)).filter((r) => r.memberId);
 }
 
-export async function loadSalesData(): Promise<any[]> {
-  // Fetch from public directory - use BASE_URL to respect Vite base path
+/**
+ * Loads sales CSV from public/data. Uses Jouete file path; for Mark use precomputed data.
+ */
+export async function loadSalesData(
+  dataSource: DataSourceId = "jouete"
+): Promise<SalesRecord[]> {
   const baseUrl = import.meta.env.BASE_URL;
-  const response = await fetch(`${baseUrl}data/sales_jouete_1y.csv`);
+  const fileName =
+    dataSource === "mark" ? "mark_sales_202602131852.csv" : "sales_jouete_1y.csv";
+  const response = await fetch(`${baseUrl}data/${fileName}`);
   if (!response.ok) {
     throw new Error(`Failed to load sales data: ${response.statusText}`);
   }
   const csvText = await response.text();
-  return parseSalesCSV(csvText);
+  return parseSalesCSV(csvText, dataSource);
 }
 
-export async function loadMemberData(): Promise<any[]> {
-  // Fetch from public directory - use BASE_URL to respect Vite base path
+/**
+ * Loads member CSV from public/data. Uses Jouete file path; for Mark use precomputed data.
+ */
+export async function loadMemberData(
+  dataSource: DataSourceId = "jouete"
+): Promise<MemberRecord[]> {
   const baseUrl = import.meta.env.BASE_URL;
-  const response = await fetch(`${baseUrl}data/member_jouete.csv`);
+  const fileName =
+    dataSource === "mark" ? "mark_membership.csv" : "member_jouete.csv";
+  const response = await fetch(`${baseUrl}data/${fileName}`);
   if (!response.ok) {
     throw new Error(`Failed to load member data: ${response.statusText}`);
   }
   const csvText = await response.text();
-  return parseMemberCSV(csvText);
+  return parseMemberCSV(csvText, dataSource);
 }

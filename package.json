@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "precompute": "tsx scripts/precomputeData.ts",
+    "precompute": "NODE_OPTIONS='--max-old-space-size=4096' tsx scripts/precomputeData.ts",
+    "precompute:jouete": "DATA_SOURCE=jouete tsx scripts/precomputeData.ts",
+    "precompute:mark": "NODE_OPTIONS='--max-old-space-size=4096' DATA_SOURCE=mark tsx scripts/precomputeData.ts",
+    "shrink:mark": "tsx scripts/shrinkMarkData.ts",
+    "test:mappers": "tsx scripts/testMappers.ts",
     "prebuild": "npm run precompute",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

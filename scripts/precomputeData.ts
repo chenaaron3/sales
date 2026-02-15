@@ -1,145 +1,130 @@
-import { readFileSync, writeFileSync } from 'fs';
-import Papa from 'papaparse';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { createReadStream, readFileSync, writeFileSync } from "fs";
+import Papa from "papaparse";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-// Import analysis functions - tsx can handle TypeScript imports
-import * as dataAnalysis from '../src/utils/dataAnalysis';
+import * as dataAnalysis from "../src/utils/dataAnalysis";
+import type { SalesRecord, MemberRecord, StoreCustomerRankRecord } from "../src/types";
+import type { DataSourceId } from "../src/utils/csvMappers";
+import {
+  mapJoueteSalesRow,
+  mapJoueteMemberRow,
+  mapMarkSalesRow,
+  mapMarkMemberRow,
+  mapMarkStoreCustomerRankRow,
+} from "../src/utils/csvMappers";
 
-// Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Type definitions
-interface SalesRecord {
-  recordUpdateDate: string;
-  recordAddDate: string;
-  memberId: string;
-  transactionNumber: string;
-  purchaseDate: string;
-  cardNumber: string;
-  productCode: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  amount: number;
-  storeCode: string;
-  storeName: string;
-  staffCode: string;
-  staffName: string;
-  brand: string;
-  collectionCode: string;
-  collectionName: string;
-  productCategoryCode: string;
-  productCategoryName: string;
-  itemCode: string;
-  itemName: string;
-  materialCode: string;
-  materialName: string;
-  colorCode: string;
-  colorName: string;
-  transactionType: string;
+const DATA_SOURCE = (process.env.DATA_SOURCE || "mark") as DataSourceId;
+const VALID_SOURCES: DataSourceId[] = ["jouete", "mark"];
+
+if (!VALID_SOURCES.includes(DATA_SOURCE)) {
+  console.error(`❌ Invalid DATA_SOURCE="${DATA_SOURCE}". Use: jouete | mark`);
+  process.exit(1);
 }
 
-interface MemberRecord {
-  memberId: string;
-  birthDate: string | null;
-  gender: string | null;
-  newsletterFlag: string;
-  dmFlag: string;
-  favoriteStore: string | null;
-  importantPersonBirthday: string | null;
-  anniversary: string | null;
-  firstRegisteredStore: string | null;
-}
-
-// Parse CSV functions (same as dataParser.ts but for Node.js)
-function parseSalesCSV(csvText: string): SalesRecord[] {
+function parseSalesCsvJouete(csvText: string): SalesRecord[] {
   const lines = csvText.split("\n");
   const csvWithoutFirstLine = lines.slice(1).join("\n");
-
-  const results = Papa.parse(csvWithoutFirstLine, {
+  const results = Papa.parse<Record<string, string>>(csvWithoutFirstLine, {
     header: true,
     skipEmptyLines: true,
   });
-
-  const transformed = results.data
-    .map((row: any) => ({
-      recordUpdateDate: row["レコード更新日時"] || "",
-      recordAddDate: row["レコード追加日時"] || "",
-      memberId: row["jouete会員番号"] || "",
-      transactionNumber: row["取引通番"] || "",
-      purchaseDate: row["購入日付"] || "",
-      cardNumber: row["カード番号"] || "",
-      productCode: row["商品コード"] || "",
-      productName: row["商品名"] || "",
-      quantity: parseFloat(row["数量"] || "0"),
-      unitPrice: parseFloat(row["単価"] || "0"),
-      amount: parseFloat(row["金額"] || "0"),
-      storeCode: row["店舗コード"] || "",
-      storeName: row["店舗名"] || "",
-      staffCode: row["担当者コード"] || "",
-      staffName: row["担当者名"] || "",
-      brand: row["ブランド"] || "",
-      collectionCode: row["コレクションコード"] || "",
-      collectionName: row["コレクション名"] || "",
-      productCategoryCode: row["商品分類"] || "",
-      productCategoryName: row["商品分類名"] || "",
-      itemCode: row["アイテムコード"] || "",
-      itemName: row["アイテム名"] || "",
-      materialCode: row["素材コード"] || "",
-      materialName: row["素材名"] || "",
-      colorCode: row["カラーコード"] || "",
-      colorName: row["カラー名"] || "",
-      transactionType: row["取引名"] || "",
-    }))
-    .filter((row: any) => row.memberId && row.purchaseDate);
-
-  return transformed as SalesRecord[];
+  return results.data
+    .map((row) => mapJoueteSalesRow(row))
+    .filter((r) => r.memberId && r.purchaseDate);
 }
 
-function parseMemberCSV(csvText: string): MemberRecord[] {
-  const results = Papa.parse(csvText, {
+function parseMemberCsvJouete(csvText: string): MemberRecord[] {
+  const results = Papa.parse<Record<string, string>>(csvText, {
     header: true,
     skipEmptyLines: true,
   });
-
-  const transformed = results.data
-    .map((row: any) => ({
-      memberId: row["jouete会員番号"] || "",
-      birthDate: row["生年月日"] || null,
-      gender: row["性別"] || null,
-      newsletterFlag: row["メルマガ希望フラグ"] || "",
-      dmFlag: row["DM送付希望フラグ"] || "",
-      favoriteStore: row["お気に入り店舗"] || null,
-      importantPersonBirthday: row["大事な方のお誕生日"] || null,
-      anniversary: row["記念日"] || null,
-      firstRegisteredStore: row["初回登録店舗"] || null,
-    }))
-    .filter((row: any) => row.memberId);
-
-  return transformed as MemberRecord[];
+  return results.data.map((row) => mapJoueteMemberRow(row)).filter((r) => r.memberId);
 }
 
-// Main precomputation function
-function precomputeData() {
-  console.log("🚀 Starting data precomputation...");
+function parseSalesCsvMark(csvText: string): SalesRecord[] {
+  const results = Papa.parse<Record<string, string>>(csvText, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return results.data
+    .map((row) => mapMarkSalesRow(row))
+    .filter((r) => r.memberId && r.purchaseDate);
+}
 
-  // Read CSV files
-  const publicDir = join(__dirname, "..", "public", "data");
-  const salesCsvPath = join(publicDir, "sales_jouete_1y.csv");
-  const memberCsvPath = join(publicDir, "member_jouete.csv");
+function parseMemberCsvMark(csvText: string): MemberRecord[] {
+  const results = Papa.parse<Record<string, string>>(csvText, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return results.data.map((row) => mapMarkMemberRow(row)).filter((r) => r.memberId);
+}
 
-  console.log("📖 Reading CSV files...");
-  const salesCsv = readFileSync(salesCsvPath, "utf-8");
-  const memberCsv = readFileSync(memberCsvPath, "utf-8");
+function parseStoreCustomerRanksCsvMark(csvText: string): StoreCustomerRankRecord[] {
+  const results = Papa.parse<Record<string, string>>(csvText, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  return results.data.map((row) => mapMarkStoreCustomerRankRow(row)).filter((r) => r.memberId);
+}
 
-  // Parse CSV files
-  console.log("🔍 Parsing CSV files...");
-  const salesData = parseSalesCSV(salesCsv);
-  const memberData = parseMemberCSV(memberCsv);
+/**
+ * Streams Mark membership CSV and returns only members whose memberId is in
+ * allowedMemberIds (if provided). This keeps memory low when the membership
+ * file is huge (e.g. 4.8M rows) but we only need members that have sales.
+ */
+function parseMemberCsvMarkStream(
+  memberCsvPath: string,
+  allowedMemberIds?: Set<string>
+): Promise<MemberRecord[]> {
+  return new Promise((resolve, reject) => {
+    const rows: MemberRecord[] = [];
+    const stream = createReadStream(memberCsvPath, { encoding: "utf-8" }).pipe(
+      Papa.parse(Papa.NODE_STREAM_INPUT, { header: true, skipEmptyLines: true })
+    );
+    stream.on("data", (row: Record<string, string>) => {
+      const mapped = mapMarkMemberRow(row);
+      if (!mapped.memberId) return;
+      if (allowedMemberIds && !allowedMemberIds.has(mapped.memberId)) return;
+      rows.push(mapped);
+    });
+    stream.on("end", () => resolve(rows));
+    stream.on("error", reject);
+  });
+}
 
-  // Filter data - default to Q3 2024 onwards
+async function precomputeData() {
+  console.log(`🚀 Starting data precomputation (DATA_SOURCE=${DATA_SOURCE})...`);
+
+  let salesData: SalesRecord[];
+  let memberData: MemberRecord[];
+  let storeCustomerRanks: StoreCustomerRankRecord[] | undefined;
+
+  if (DATA_SOURCE === "jouete") {
+    const publicDir = join(__dirname, "..", "public", "data");
+    const salesCsvPath = join(publicDir, "sales_jouete_1y.csv");
+    const memberCsvPath = join(publicDir, "member_jouete.csv");
+    console.log("📖 Reading CSV files from public/data...");
+    const salesCsv = readFileSync(salesCsvPath, "utf-8");
+    const memberCsv = readFileSync(memberCsvPath, "utf-8");
+    salesData = parseSalesCsvJouete(salesCsv);
+    memberData = parseMemberCsvJouete(memberCsv);
+  } else {
+    const srcDataDir = join(__dirname, "..", "src", "data");
+    const salesCsvPath = join(srcDataDir, "mark_sales_202602131852.csv");
+    const memberCsvPath = join(srcDataDir, "mark_membership.csv");
+    const ranksCsvPath = join(srcDataDir, "mark_store_customer_ranks.csv");
+    console.log("📖 Reading CSV files from src/data (Mark)...");
+    salesData = parseSalesCsvMark(readFileSync(salesCsvPath, "utf-8"));
+    const salesMemberIds = new Set(salesData.map((r) => r.memberId));
+    console.log("📖 Streaming membership (keeping only members with sales)...");
+    memberData = await parseMemberCsvMarkStream(memberCsvPath, salesMemberIds);
+    storeCustomerRanks = parseStoreCustomerRanksCsvMark(readFileSync(ranksCsvPath, "utf-8"));
+  }
+
   const filteredData = salesData.filter((record) => {
     if (!record.purchaseDate) return false;
     if (record.purchaseDate < "2024-07-01") return false;
@@ -148,28 +133,18 @@ function precomputeData() {
   });
 
   console.log(
-    `✅ Processed ${filteredData.length} sales records and ${memberData.length} member records`
+    `✅ Processed ${filteredData.length} sales records and ${memberData.length} member records` +
+      (storeCustomerRanks ? `, ${storeCustomerRanks.length} store-customer rank records` : "")
   );
 
-  // Precompute all analysis values
   console.log("⚙️  Computing analysis values...");
 
-  const precomputed = {
-    // KPIs
+  const precomputed: Record<string, unknown> = {
+    dataSource: DATA_SOURCE,
     kpis: dataAnalysis.calculateKPIs(filteredData),
-
-    // Trends - multiple granularities
     trendDataDaily: dataAnalysis.getTrendsByGranularity(filteredData, "daily"),
-    trendDataWeekly: dataAnalysis.getTrendsByGranularity(
-      filteredData,
-      "weekly"
-    ),
-    trendDataMonthly: dataAnalysis.getTrendsByGranularity(
-      filteredData,
-      "monthly"
-    ),
-
-    // Birthday analysis - both types
+    trendDataWeekly: dataAnalysis.getTrendsByGranularity(filteredData, "weekly"),
+    trendDataMonthly: dataAnalysis.getTrendsByGranularity(filteredData, "monthly"),
     birthdayDataCustomer: dataAnalysis.getBirthdaySalesCorrelation(
       filteredData,
       memberData,
@@ -182,105 +157,31 @@ function precomputeData() {
       30,
       "importantPerson"
     ),
-
-    // Anniversary sales correlation
-    anniversaryData: dataAnalysis.getAnniversarySalesCorrelation(
-      filteredData,
-      memberData,
-      30
-    ),
-
-    // Attribute trends
-    colorTrends: dataAnalysis.getAttributeTrends(
-      filteredData,
-      "color",
-      "monthly"
-    ),
-    materialTrends: dataAnalysis.getAttributeTrends(
-      filteredData,
-      "material",
-      "monthly"
-    ),
-
-    // Customer segments
+    anniversaryData: dataAnalysis.getAnniversarySalesCorrelation(filteredData, memberData, 30),
+    colorTrends: dataAnalysis.getAttributeTrends(filteredData, "color", "monthly"),
+    materialTrends: dataAnalysis.getAttributeTrends(filteredData, "material", "monthly"),
     customerSegments: dataAnalysis.getCustomerSegments(filteredData),
-
-    // Day of week
     dayOfWeekData: dataAnalysis.getDayOfWeekAnalysis(filteredData),
-
-    // Product trends (daily, weekly, monthly)
-    productTrendsDaily: dataAnalysis.getProductTrends(
-      filteredData,
-      25,
-      "daily"
-    ),
-    productTrendsWeekly: dataAnalysis.getProductTrends(
-      filteredData,
-      25,
-      "weekly"
-    ),
-    productTrendsMonthly: dataAnalysis.getProductTrends(
-      filteredData,
-      25,
-      "monthly"
-    ),
-    collectionTrendsDaily: dataAnalysis.getCollectionTrends(
-      filteredData,
-      25,
-      "daily"
-    ),
-    collectionTrendsWeekly: dataAnalysis.getCollectionTrends(
-      filteredData,
-      25,
-      "weekly"
-    ),
-    collectionTrendsMonthly: dataAnalysis.getCollectionTrends(
-      filteredData,
-      25,
-      "monthly"
-    ),
-    categoryTrendsWeekly: dataAnalysis.getCategoryTrends(
-      filteredData,
-      25,
-      "weekly"
-    ),
-    categoryTrendsMonthly: dataAnalysis.getCategoryTrends(
-      filteredData,
-      25,
-      "monthly"
-    ),
-
-    // Product performance with stores
-    productPerformanceWithStores: dataAnalysis.getProductPerformanceWithStores(
+    productTrendsDaily: dataAnalysis.getProductTrends(filteredData, 25, "daily"),
+    productTrendsWeekly: dataAnalysis.getProductTrends(filteredData, 25, "weekly"),
+    productTrendsMonthly: dataAnalysis.getProductTrends(filteredData, 25, "monthly"),
+    collectionTrendsDaily: dataAnalysis.getCollectionTrends(filteredData, 25, "daily"),
+    collectionTrendsWeekly: dataAnalysis.getCollectionTrends(filteredData, 25, "weekly"),
+    collectionTrendsMonthly: dataAnalysis.getCollectionTrends(filteredData, 25, "monthly"),
+    categoryTrendsWeekly: dataAnalysis.getCategoryTrends(filteredData, 25, "weekly"),
+    categoryTrendsMonthly: dataAnalysis.getCategoryTrends(filteredData, 25, "monthly"),
+    productPerformanceWithStores: dataAnalysis.getProductPerformanceWithStores(filteredData, 25),
+    collectionPerformanceWithStores: dataAnalysis.getCollectionPerformanceWithStores(
       filteredData,
       25
     ),
-    collectionPerformanceWithStores:
-      dataAnalysis.getCollectionPerformanceWithStores(filteredData, 25),
-    categoryPerformanceWithStores:
-      dataAnalysis.getCategoryPerformanceWithStores(filteredData, 25),
-    colorPerformanceWithStores: dataAnalysis.getColorPerformanceWithStores(
-      filteredData,
-      25
-    ),
-    materialPerformanceWithStores:
-      dataAnalysis.getMaterialPerformanceWithStores(filteredData, 25),
-
-    // Store performance
-    storePerformanceWithProducts: dataAnalysis.getStorePerformanceWithProducts(
-      filteredData,
-      25
-    ),
-    // Store trends (daily, weekly, monthly)
+    categoryPerformanceWithStores: dataAnalysis.getCategoryPerformanceWithStores(filteredData, 25),
+    colorPerformanceWithStores: dataAnalysis.getColorPerformanceWithStores(filteredData, 25),
+    materialPerformanceWithStores: dataAnalysis.getMaterialPerformanceWithStores(filteredData, 25),
+    storePerformanceWithProducts: dataAnalysis.getStorePerformanceWithProducts(filteredData, 25),
     storeTrendsDaily: dataAnalysis.getStoreTrends(filteredData, 25, "daily"),
     storeTrendsWeekly: dataAnalysis.getStoreTrends(filteredData, 25, "weekly"),
-    storeTrendsMonthly: dataAnalysis.getStoreTrends(
-      filteredData,
-      25,
-      "monthly"
-    ),
-
-    // Advanced segmentation
+    storeTrendsMonthly: dataAnalysis.getStoreTrends(filteredData, 25, "monthly"),
     rfmSegments: dataAnalysis.getRFMSegments(filteredData),
     rfmMatrix: dataAnalysis.getRFMMatrix(filteredData),
     frequencySegments: dataAnalysis.getFrequencySegments(filteredData),
@@ -288,26 +189,25 @@ function precomputeData() {
     genderSegments: dataAnalysis.getGenderSegments(filteredData, memberData),
     channelSegments: dataAnalysis.getChannelSegments(filteredData),
     aovSegments: dataAnalysis.getAOVSegments(filteredData),
-
-    // Employee performance (all employees, no limit)
     employeePerformance: dataAnalysis.getEmployeePerformance(filteredData),
   };
 
-  // Write to JSON file
+  if (storeCustomerRanks && storeCustomerRanks.length > 0) {
+    precomputed.storeCustomerRanks = storeCustomerRanks;
+  }
+
+  const publicDir = join(__dirname, "..", "public", "data");
   const outputPath = join(publicDir, "precomputed.json");
   console.log("💾 Writing precomputed data to", outputPath);
   writeFileSync(outputPath, JSON.stringify(precomputed, null, 2), "utf-8");
 
   console.log("✅ Data precomputation complete!");
-  console.log(
-    `📊 Precomputed ${Object.keys(precomputed).length} analysis results`
-  );
+  console.log(`📊 Precomputed ${Object.keys(precomputed).length} analysis results`);
 }
 
-// Run precomputation
-try {
-  precomputeData();
-} catch (error) {
-  console.error("❌ Error during precomputation:", error);
-  process.exit(1);
-}
+precomputeData()
+  .then(() => {})
+  .catch((error) => {
+    console.error("❌ Error during precomputation:", error);
+    process.exit(1);
+  });

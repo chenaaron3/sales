@@ -58,27 +58,24 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
     const maxValue = metricValues.length > 0 ? Math.max(...metricValues) : 0;
     const valueRange = maxValue - minValue;
 
-    // Helper to get color intensity based on selected metric
-    // Green = good (high), Red = bad (low)
+    // Helper to get color intensity based on selected metric (theme palette: teal = high, destructive = low)
     const getColorIntensity = (value: number): string => {
-        if (value === 0) return 'bg-gray-100 dark:bg-gray-800';
+        if (value === 0) return 'rfm-cell-0';
 
-        // Normalize value to 0-1 range
         const intensity = valueRange > 0
             ? (value - minValue) / valueRange
             : 0.5;
 
-        // Green (good) to Red (bad) color scale
-        if (intensity >= 0.9) return 'bg-green-600 dark:bg-green-700';      // Very high (best)
-        if (intensity >= 0.8) return 'bg-green-500 dark:bg-green-600';      // High
-        if (intensity >= 0.7) return 'bg-green-400 dark:bg-green-500';       // Medium-high
-        if (intensity >= 0.6) return 'bg-lime-400 dark:bg-lime-500';        // Medium-high
-        if (intensity >= 0.5) return 'bg-yellow-400 dark:bg-yellow-500';     // Medium
-        if (intensity >= 0.4) return 'bg-amber-400 dark:bg-amber-500';       // Medium-low
-        if (intensity >= 0.3) return 'bg-orange-400 dark:bg-orange-500';     // Low-medium
-        if (intensity >= 0.2) return 'bg-orange-500 dark:bg-orange-600';      // Low
-        if (intensity >= 0.1) return 'bg-red-400 dark:bg-red-500';          // Very low
-        return 'bg-red-500 dark:bg-red-600';                                  // Lowest (worst)
+        if (intensity >= 0.9) return 'rfm-cell-9';
+        if (intensity >= 0.8) return 'rfm-cell-8';
+        if (intensity >= 0.7) return 'rfm-cell-7';
+        if (intensity >= 0.6) return 'rfm-cell-6';
+        if (intensity >= 0.5) return 'rfm-cell-5';
+        if (intensity >= 0.4) return 'rfm-cell-4';
+        if (intensity >= 0.3) return 'rfm-cell-3';
+        if (intensity >= 0.2) return 'rfm-cell-2';
+        if (intensity >= 0.1) return 'rfm-cell-1';
+        return 'rfm-cell-1';
     };
 
     const getDisplayValue = (cell: RFMMatrixCell | undefined): string => {
@@ -179,7 +176,7 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
                         {t('rfm.title')}
                     </CardTitle>
                     <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('common.metric')}:</span>
+                        <span className="text-sm text-muted-foreground">{t('common.metric')}:</span>
                         <ToggleGroup
                             type="single"
                             value={metricType}
@@ -203,24 +200,22 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
-                    {/* Color Legend */}
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    {/* Color Legend – theme teal (high) to destructive (low) */}
+                    <div className="p-3 rounded-lg border bg-muted/50 border-border">
                         <div className="flex items-center gap-4">
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('rfm.colorScale')}</span>
+                            <span className="text-sm font-semibold text-foreground">{t('rfm.colorScale')}</span>
                             <div className="flex items-center gap-2 flex-1">
                                 <div className="flex items-center gap-1">
-                                    <div className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 bg-green-600 dark:bg-green-700"></div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">{t('common.high')}</span>
+                                    <div className="w-6 h-6 rounded border border-border rfm-cell-9"></div>
+                                    <span className="text-xs text-muted-foreground">{t('common.high')}</span>
                                 </div>
-                                <div className="flex-1 h-4 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600" style={{
-                                    background: 'linear-gradient(to right, rgb(22, 163, 74), rgb(34, 197, 94), rgb(132, 204, 22), rgb(250, 204, 21), rgb(251, 191, 36), rgb(251, 146, 60), rgb(249, 115, 22), rgb(239, 68, 68), rgb(220, 38, 38))'
-                                }}></div>
+                                <div className="flex-1 h-4 rounded-full overflow-hidden border border-border rfm-legend-bar"></div>
                                 <div className="flex items-center gap-1">
-                                    <div className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 bg-red-500 dark:bg-red-600"></div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">{t('common.low')}</span>
+                                    <div className="w-6 h-6 rounded border border-border rfm-cell-1"></div>
+                                    <span className="text-xs text-muted-foreground">{t('common.low')}</span>
                                 </div>
                             </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 italic">
+                            <span className="text-xs text-muted-foreground italic">
                                 {t(`rfm.colorScaleDescriptions.${metricType}`)}
                             </span>
                         </div>
@@ -232,18 +227,18 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
                             <div className="inline-block min-w-full">
                                 {/* Header row with F labels */}
                                 <div className="flex mb-2">
-                                    <div className="w-32 flex items-center justify-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    <div className="w-32 flex items-center justify-center text-sm font-semibold text-foreground">
                                         F →
                                     </div>
                                     {frequencyLabels.map((f) => {
                                         const range = frequencyRanges[f.value];
                                         return (
                                             <div key={f.value} className="flex-1 text-center px-1">
-                                                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                                <div className="text-xs font-semibold text-foreground">
                                                     {t(f.key)}
                                                 </div>
                                                 {range && (
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <div className="text-xs text-muted-foreground mt-0.5">
                                                         {range.min === range.max
                                                             ? `${range.min} ${t('rfm.frequency.transaction')}`
                                                             : `${range.min}-${range.max} ${t('rfm.frequency.transactions')}`
@@ -262,11 +257,11 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
                                         <div key={r.value} className="flex mb-1">
                                             {/* R label */}
                                             <div className="w-32 flex flex-col items-center justify-center text-xs px-1">
-                                                <div className="font-semibold text-gray-700 dark:text-gray-300">
+                                                <div className="font-semibold text-foreground">
                                                     {t(r.key)}
                                                 </div>
                                                 {recencyRange && (
-                                                    <div className="text-gray-500 dark:text-gray-400 mt-0.5 text-center">
+                                                    <div className="text-muted-foreground mt-0.5 text-center text-xs">
                                                         {recencyRange.min === recencyRange.max
                                                             ? `${recencyRange.min} ${t('rfm.recency.day')}`
                                                             : `${recencyRange.min}-${recencyRange.max} ${t('rfm.recency.days')}`
@@ -284,14 +279,14 @@ export function RFMAnalysis({ rfmMatrix }: RFMAnalysisProps) {
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
                                                                 <div
-                                                                    className={`flex-1 h-20 border-2 rounded-md transition-all border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 cursor-help ${getColorIntensity(getMetricValue(data))}`}
+                                                                    className={`flex-1 h-20 border-2 rounded-md transition-all border-border hover:border-muted-foreground/30 cursor-help ${getColorIntensity(getMetricValue(data))}`}
                                                                 >
                                                                     <div className="h-full flex flex-col items-center justify-center p-2 text-center">
-                                                                        <div className="text-xs font-semibold text-gray-900 dark:text-white">
+                                                                        <div className="text-xs font-semibold text-card-foreground">
                                                                             {getDisplayValue(data)}
                                                                         </div>
                                                                         {metricType !== 'customers' && data && data.count > 0 && (
-                                                                            <div className="text-xs text-gray-700 dark:text-gray-200 mt-1">
+                                                                            <div className="text-xs text-muted-foreground mt-1">
                                                                                 {formatNumber(data.count)} {t('rfm.metrics.customers')}
                                                                             </div>
                                                                         )}

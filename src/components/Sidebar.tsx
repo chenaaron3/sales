@@ -9,6 +9,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useDataSource } from '../contexts/DataSourceContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeToggle } from './ThemeToggle';
 
 export type TabType = 'customers' | 'product' | 'sales' | 'stores' | 'employees';
 
@@ -30,8 +33,15 @@ const tabIcons: Record<TabType, React.ComponentType<{ className?: string }>> = {
 const SIDEBAR_WIDTH = 224; /* 14rem = w-56 */
 const SIDEBAR_COLLAPSED_WIDTH = 72;
 
+const BRAND_LABEL: Record<string, { full: string; short: string }> = {
+  jouete: { full: 'Jouete', short: 'J' },
+  mark: { full: 'Mark', short: 'M' },
+};
+
 export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }: SidebarProps) {
   const { t } = useTranslation();
+  const dataSource = useDataSource();
+  const brand = BRAND_LABEL[dataSource] ?? BRAND_LABEL.jouete;
 
   const tabs: { id: TabType; labelKey: string }[] = [
     { id: 'sales', labelKey: 'header.tabs.sales' },
@@ -46,11 +56,13 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
       className="fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-white/10 transition-[width] duration-200 shrink-0"
       style={{
         width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
-        backgroundColor: 'var(--color-nifty-nav)',
       }}
     >
-      {/* Logo / brand */}
-      <div className="flex h-14 items-center border-b border-white/10 px-4 shrink-0">
+      {/* Logo / brand + theme & language – same dark blue as navbar */}
+      <div
+        className="flex h-14 items-center justify-between gap-2 border-b border-white/10 px-4 shrink-0"
+        style={{ backgroundColor: 'var(--color-nifty-sidebar-header)' }}
+      >
         <AnimatePresence mode="wait">
           {collapsed ? (
             <motion.div
@@ -58,9 +70,9 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center justify-center w-9 h-9 rounded-lg font-semibold text-sm bg-white/15 text-white"
+              className="flex items-center justify-center w-9 h-9 rounded-lg font-semibold text-sm bg-white/15 text-white shrink-0"
             >
-              J
+              {brand.short}
             </motion.div>
           ) : (
             <motion.div
@@ -68,16 +80,23 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-semibold text-lg text-white truncate"
+              className="font-semibold text-lg text-white truncate min-w-0"
             >
-              Jouete
+              {brand.full}
             </motion.div>
           )}
         </AnimatePresence>
+        <div className="flex items-center gap-1 shrink-0">
+          <ThemeToggle />
+          <LanguageSwitcher />
+        </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+      {/* Nav – secondary gray-blue background */}
+      <nav
+        className="flex-1 py-4 px-3 space-y-1 overflow-y-auto"
+        style={{ backgroundColor: 'var(--color-nifty-sidebar-bg)' }}
+      >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tabIcons[tab.id];
@@ -87,11 +106,12 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
               onClick={() => onTabChange(tab.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors font-normal text-white ${
                 collapsed ? 'justify-center px-0' : ''
-              } ${
+              } ${!isActive ? 'hover:bg-white/10 hover:text-white' : ''}`}
+              style={
                 isActive
-                  ? 'bg-white/15'
-                  : 'text-white/90 hover:bg-white/10 hover:text-white'
-              }`}
+                  ? { backgroundColor: 'var(--color-nifty-sidebar-active)' }
+                  : undefined
+              }
             >
               <Icon className="h-5 w-5 shrink-0" />
               {!collapsed && <span className="truncate">{t(tab.labelKey)}</span>}
@@ -100,8 +120,11 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
         })}
       </nav>
 
-      {/* Collapse toggle */}
-      <div className="p-3 border-t border-white/10">
+      {/* Collapse toggle – same gray-blue as nav */}
+      <div
+        className="p-3 border-t border-white/10"
+        style={{ backgroundColor: 'var(--color-nifty-sidebar-bg)' }}
+      >
         <button
           type="button"
           onClick={onToggleCollapse}
