@@ -3,6 +3,7 @@ import {
 } from 'recharts';
 
 import { formatCurrency } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { AttributeTrend } from '../types';
 
 interface AttributeTrendsProps {
@@ -22,8 +23,8 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
             });
 
             return (
-                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
+                <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+                    <p className="text-sm font-semibold text-card-foreground mb-2">{label}</p>
                     <div className="space-y-1">
                         {sortedPayload.map((entry: any, index: number) => (
                             <div key={index} className="flex items-center gap-2">
@@ -31,10 +32,10 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
                                     className="w-3 h-3 rounded-sm"
                                     style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                <span className="text-sm text-muted-foreground flex-1">
                                     {entry.name}:
                                 </span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                <span className="text-sm font-semibold text-card-foreground">
                                     {formatCurrency(entry.value as number || 0)}
                                 </span>
                             </div>
@@ -65,10 +66,7 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
         .slice(0, 8)
         .map(item => item.attr);
 
-    const colors = [
-        '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-        '#d084d0', '#ffb347', '#87ceeb'
-    ];
+    const colors = SEGMENT_COLORS;
 
     return (
         <ResponsiveContainer width="100%" height={400}>

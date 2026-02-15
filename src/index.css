@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
-/* Template palette: dark blue navbar, gray-blue sidebar, white content, teal CTA */
+/* Palette from sample: dark blue header (#2E5691), white cards, #F8F8F9 background, #E0E0E0 borders */
 @theme {
-  /* Light theme – very light gray content area, white cards, light borders */
-  --color-background: #f8f8f8;
-  --color-foreground: #4a5568;
-  --color-card: #ffffff;
-  --color-card-foreground: #4a5568;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #4a5568;
+  --color-background: #F8F8F9;
+  --color-foreground: #333333;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #333333;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #333333;
   --color-primary: #2C3B53;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f0f0f0;
-  --color-secondary-foreground: #4a5568;
-  --color-muted: #f8f8f8;
-  --color-muted-foreground: #718096;
-  --color-accent: #e8e8e8;
-  --color-accent-foreground: #4a5568;
-  --color-destructive: #e74c3c;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #e0e0e0;
-  --color-input: #e0e0e0;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #E0E0E0;
+  --color-secondary-foreground: #333333;
+  --color-muted: #F8F8F9;
+  --color-muted-foreground: #666666;
+  --color-accent: #E0E0E0;
+  --color-accent-foreground: #333333;
+  --color-destructive: #d9534f;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #E0E0E0;
+  --color-input: #E0E0E0;
   --color-ring: #2C3B53;
   --radius: 0.5rem;
   /* Navbar: primary dark blue */
@@ -29,43 +28,56 @@
   --color-nifty-sidebar-header: #2C3B53;
   --color-nifty-sidebar-bg: #384C66;
   --color-nifty-sidebar-active: #2F405E;
-  /* CTA / primary action (e.g. "Change conditions") */
-  --color-nifty-teal: #2ECC71;
-  --color-nifty-teal-foreground: #ffffff;
-  /* RFM matrix scale: high (teal) → low (destructive), blends with theme */
-  --rfm-high: #2ECC71;
-  --rfm-low: #e74c3c;
+  /* CTA / positive: bright green from sample */
+  --color-nifty-teal: #5cb85c;
+  --color-nifty-teal-foreground: #FFFFFF;
+  /* RFM / heatmap scale: green (high) → red (low), sample categorical */
+  --rfm-high: #5cb85c;
+  --rfm-low: #d9534f;
+  /* Chart/segment categorical colors from sample */
+  --chart-green: #5cb85c;
+  --chart-orange: #f0ad4e;
+  --chart-red: #d9534f;
+  --chart-cyan: #5bc0de;
+  --chart-yellow: #FFD700;
+  --chart-green-light: #8BC34A;
 }
 
-/* Dark theme overrides when .dark on html */
+/* Dark theme: same sample palette, darkened */
 .dark {
-  --color-background: oklch(12% 0.01 250);
-  --color-foreground: oklch(98% 0 0);
-  --color-card: oklch(18% 0.01 250);
-  --color-card-foreground: oklch(98% 0 0);
-  --color-popover: oklch(18% 0.01 250);
-  --color-popover-foreground: oklch(98% 0 0);
-  --color-primary: oklch(98% 0 0);
-  --color-primary-foreground: oklch(20% 0.01 250);
-  --color-secondary: oklch(22% 0.01 250);
-  --color-secondary-foreground: oklch(98% 0 0);
-  --color-muted: oklch(20% 0.01 250);
-  --color-muted-foreground: oklch(70% 0 0);
-  --color-accent: oklch(22% 0.01 250);
-  --color-accent-foreground: oklch(98% 0 0);
-  --color-destructive: oklch(45% 0.2 25);
-  --color-destructive-foreground: oklch(98% 0 0);
-  --color-border: oklch(25% 0.01 250);
-  --color-input: oklch(22% 0.01 250);
-  --color-ring: oklch(80% 0 0);
+  --color-background: #1a1d24;
+  --color-foreground: #e8e8e8;
+  --color-card: #252830;
+  --color-card-foreground: #e8e8e8;
+  --color-popover: #252830;
+  --color-popover-foreground: #e8e8e8;
+  --color-primary: #3d6ab3;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #353842;
+  --color-secondary-foreground: #e8e8e8;
+  --color-muted: #252830;
+  --color-muted-foreground: #a0a0a0;
+  --color-accent: #353842;
+  --color-accent-foreground: #e8e8e8;
+  --color-destructive: #e05c58;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #353842;
+  --color-input: #353842;
+  --color-ring: #3d6ab3;
   --color-nifty-nav: #1e2a38;
   --color-nifty-sidebar-header: #1e2a38;
   --color-nifty-sidebar-bg: #243447;
   --color-nifty-sidebar-active: #2c3e50;
-  --color-nifty-teal: #27ae60;
+  --color-nifty-teal: #5cb85c;
   --color-nifty-teal-foreground: #ffffff;
-  --rfm-high: #27ae60;
-  --rfm-low: oklch(45% 0.2 25);
+  --rfm-high: #5cb85c;
+  --rfm-low: #d9534f;
+  --chart-green: #5cb85c;
+  --chart-orange: #f0ad4e;
+  --chart-red: #d9534f;
+  --chart-cyan: #5bc0de;
+  --chart-yellow: #FFD700;
+  --chart-green-light: #8BC34A;
 }
 
 @layer base {
@@ -95,10 +107,19 @@ body {
   min-height: 100vh;
 }
 
+header {
+  margin: 0;
+}
+
 h1 {
+  margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.3;
+}
+
+h2, h3, h4, h5, h6 {
+  margin: 0;
 }
 
 button {
@@ -117,30 +138,30 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* RFM matrix: scale from theme teal (high) to destructive (low) */
+/* RFM / heatmap scale: sample green → orange → red */
 .rfm-legend-bar {
-  background: linear-gradient(to right, var(--rfm-high), #5dd68a, #8ee0a8, #b8e8c4, #d4eedc, #e8d4d4, #e0a8a8, #d67878, var(--rfm-low));
+  background: linear-gradient(to right, var(--rfm-high), #7bc97b, #a8d9a8, #c5e8c5, #e8dcc5, #e8c5c5, #d9a8a8, #c97b7b, var(--rfm-low));
 }
 .rfm-cell-0 { background-color: var(--color-muted); }
 .rfm-cell-1 { background-color: var(--rfm-low); }
-.rfm-cell-2 { background-color: #d67878; }
-.rfm-cell-3 { background-color: #e0a8a8; }
-.rfm-cell-4 { background-color: #e8d4d4; }
-.rfm-cell-5 { background-color: #d4eedc; }
-.rfm-cell-6 { background-color: #b8e8c4; }
-.rfm-cell-7 { background-color: #8ee0a8; }
-.rfm-cell-8 { background-color: #5dd68a; }
+.rfm-cell-2 { background-color: #c97b7b; }
+.rfm-cell-3 { background-color: #d9a8a8; }
+.rfm-cell-4 { background-color: #e8c5c5; }
+.rfm-cell-5 { background-color: #e8dcc5; }
+.rfm-cell-6 { background-color: #c5e8c5; }
+.rfm-cell-7 { background-color: #a8d9a8; }
+.rfm-cell-8 { background-color: #7bc97b; }
 .rfm-cell-9 { background-color: var(--rfm-high); }
 .dark .rfm-legend-bar {
-  background: linear-gradient(to right, var(--rfm-high), oklch(50% 0.12 160), oklch(42% 0.06 160), oklch(35% 0.04 250), oklch(32% 0.04 250), oklch(38% 0.06 25), oklch(42% 0.1 25), oklch(48% 0.15 25), var(--rfm-low));
+  background: linear-gradient(to right, var(--rfm-high), #7bc97b, #a8d9a8, #5a5a6a, #6a5a5a, #c97b7b, var(--rfm-low));
 }
 .dark .rfm-cell-0 { background-color: var(--color-muted); }
 .dark .rfm-cell-1 { background-color: var(--rfm-low); }
-.dark .rfm-cell-2 { background-color: oklch(50% 0.15 25); }
-.dark .rfm-cell-3 { background-color: oklch(45% 0.12 25); }
-.dark .rfm-cell-4 { background-color: oklch(35% 0.04 250); }
-.dark .rfm-cell-5 { background-color: oklch(32% 0.04 160); }
-.dark .rfm-cell-6 { background-color: oklch(38% 0.08 160); }
-.dark .rfm-cell-7 { background-color: oklch(45% 0.1 160); }
-.dark .rfm-cell-8 { background-color: oklch(50% 0.12 160); }
+.dark .rfm-cell-2 { background-color: #a85a5a; }
+.dark .rfm-cell-3 { background-color: #c97b7b; }
+.dark .rfm-cell-4 { background-color: #5a5a6a; }
+.dark .rfm-cell-5 { background-color: #5a6a5a; }
+.dark .rfm-cell-6 { background-color: #7bc97b; }
+.dark .rfm-cell-7 { background-color: #8ed98e; }
+.dark .rfm-cell-8 { background-color: #9ee99e; }
 .dark .rfm-cell-9 { background-color: var(--rfm-high); }

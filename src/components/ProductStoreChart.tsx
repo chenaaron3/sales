@@ -3,13 +3,14 @@ import {
     Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { ProductStorePerformance } from '../types';
 
 interface ProductStoreChartProps {
     data: ProductStorePerformance[];
 }
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8'];
+const COLORS = SEGMENT_COLORS;
 
 export function ProductStoreChart({ data }: ProductStoreChartProps) {
     const [viewMode, setViewMode] = useState<'byProduct' | 'byStore'>('byProduct');
@@ -54,8 +55,8 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
 
     if (chartData.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            <div className="bg-card rounded-lg shadow-md p-6 border border-border mb-8">
+                <h2 className="text-xl font-bold text-card-foreground mb-4">
                     Product by Store Performance
                 </h2>
                 <div className="mb-4">
@@ -64,7 +65,7 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                             onClick={() => setViewMode('byProduct')}
                             className={`px-4 py-2 rounded-md text-sm ${viewMode === 'byProduct'
                                 ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                                : 'bg-card text-muted-foreground border border-border'
                                 }`}
                         >
                             By Product
@@ -73,7 +74,7 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                             onClick={() => setViewMode('byStore')}
                             className={`px-4 py-2 rounded-md text-sm ${viewMode === 'byStore'
                                 ? 'bg-indigo-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                                : 'bg-card text-muted-foreground border border-border'
                                 }`}
                         >
                             By Store
@@ -81,13 +82,13 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                     </div>
                     {viewMode === 'byProduct' ? (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">
                                 Select Product
                             </label>
                             <select
                                 value={selectedProduct || ''}
                                 onChange={(e) => setSelectedProduct(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="w-full px-3 py-2 border border-border rounded-md bg-white dark:bg-muted text-card-foreground"
                             >
                                 <option value="">-- Select a product --</option>
                                 {uniqueProducts.map(product => (
@@ -99,13 +100,13 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                         </div>
                     ) : (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">
                                 Select Store
                             </label>
                             <select
                                 value={selectedStore || ''}
                                 onChange={(e) => setSelectedStore(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="w-full px-3 py-2 border border-border rounded-md bg-white dark:bg-muted text-card-foreground"
                             >
                                 <option value="">-- Select a store --</option>
                                 {uniqueStores.map(store => (
@@ -121,8 +122,8 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
     }
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="bg-card rounded-lg shadow-md p-6 border border-border mb-8">
+            <h2 className="text-xl font-bold text-card-foreground mb-4">
                 {title}
             </h2>
             <div className="mb-4">
@@ -135,7 +136,7 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                         }}
                         className={`px-4 py-2 rounded-md text-sm ${viewMode === 'byProduct'
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                            : 'bg-card text-muted-foreground border border-border'
                             }`}
                     >
                         By Product
@@ -148,7 +149,7 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                         }}
                         className={`px-4 py-2 rounded-md text-sm ${viewMode === 'byStore'
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                            : 'bg-card text-muted-foreground border border-border'
                             }`}
                     >
                         By Store
@@ -156,13 +157,13 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                 </div>
                 {viewMode === 'byProduct' ? (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">
                             Select Product
                         </label>
                         <select
                             value={selectedProduct || ''}
                             onChange={(e) => setSelectedProduct(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="w-full px-3 py-2 border border-border rounded-md bg-white dark:bg-muted text-card-foreground"
                         >
                             <option value="">-- Select a product --</option>
                             {uniqueProducts.map(product => (
@@ -174,13 +175,13 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                     </div>
                 ) : (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">
                             Select Store
                         </label>
                         <select
                             value={selectedStore || ''}
                             onChange={(e) => setSelectedStore(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="w-full px-3 py-2 border border-border rounded-md bg-white dark:bg-muted text-card-foreground"
                         >
                             <option value="">-- Select a store --</option>
                             {uniqueStores.map(store => (
@@ -208,7 +209,7 @@ export function ProductStoreChart({ data }: ProductStoreChartProps) {
                         }}
                     />
                     <Legend />
-                    <Bar dataKey="revenue" fill="#8884d8" name="Revenue">
+                    <Bar dataKey="revenue" fill={COLORS[0]} name="Revenue">
                         {chartData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}

@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 
 import { formatCurrency, formatNumber } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
@@ -50,7 +51,7 @@ export function AdvancedCustomerSegmentation({
     };
 
     const currentData = segmentData[activeSegment];
-    const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8'];
+    const COLORS = SEGMENT_COLORS;
 
     const translateSegmentLabel = (segmentName: string): string => {
         const translationKey = `segmentation.segmentLabels.${segmentName}`;
@@ -80,7 +81,7 @@ export function AdvancedCustomerSegmentation({
                 {/* Segmentation Type Selector */}
                 <div className="mb-6">
                     <div className="flex items-center justify-between mb-3">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <label className="text-sm font-medium text-foreground">
                             {t('segmentation.dimension')}
                         </label>
                         <ToggleGroup
@@ -105,7 +106,7 @@ export function AdvancedCustomerSegmentation({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Pie Chart */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="text-lg font-semibold text-card-foreground mb-4">
                             {segmentLabel} {t('segmentation.distribution')}
                         </h3>
                         <ResponsiveContainer width="100%" height={350}>
@@ -117,7 +118,7 @@ export function AdvancedCustomerSegmentation({
                                     labelLine={true}
                                     label={(entry: any) => `${entry.translatedSegment}: ${entry.percentage.toFixed(1)}%`}
                                     outerRadius={80}
-                                    fill="#8884d8"
+                                    fill={COLORS[0]}
                                     dataKey="count"
                                     nameKey="segment"
                                 >
@@ -149,7 +150,7 @@ export function AdvancedCustomerSegmentation({
 
                     {/* Bar Chart - Revenue by Segment */}
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="text-lg font-semibold text-card-foreground mb-4">
                             {t('segmentation.revenueBySegment')}
                         </h3>
                         <ResponsiveContainer width="100%" height={350}>
@@ -205,7 +206,7 @@ export function AdvancedCustomerSegmentation({
                                         );
                                     }}
                                 />
-                                <Bar dataKey="totalRevenue" fill="#8884d8" name={t('common.revenue')}>
+                                <Bar dataKey="totalRevenue" fill={COLORS[0]} name={t('common.revenue')}>
                                     {chartData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}

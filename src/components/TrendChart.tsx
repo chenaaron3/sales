@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { formatCurrency } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { Granularity } from '../utils/dataAnalysis';
 import type { TimeSeriesData } from '../types';
 
@@ -66,15 +67,15 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
             }
 
             return (
-                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{displayLabel}</p>
+                <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+                    <p className="text-sm font-semibold text-card-foreground mb-1">{displayLabel}</p>
                     {dateRange && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{dateRange}</p>
+                        <p className="text-xs text-muted-foreground mb-2">{dateRange}</p>
                     )}
-                    <p className="text-sm text-gray-900 dark:text-white">
+                    <p className="text-sm text-card-foreground">
                         {t('charts.revenue')}: <span className="font-semibold">{formatCurrency(revenue)}</span>
                     </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                         {t('charts.percentile', { value: percentile })}
                     </p>
                 </div>
@@ -96,7 +97,7 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
                 />
                 <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
                 <Tooltip content={(props) => <CustomTooltip {...props} data={data} granularity={granularity} t={t} />} />
-                <Bar dataKey="revenue" fill="#8884d8" name={t('charts.revenue')} />
+                <Bar dataKey="revenue" fill={SEGMENT_COLORS[0]} name={t('charts.revenue')} />
             </BarChart>
         </ResponsiveContainer>
     );

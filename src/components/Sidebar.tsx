@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDataSource } from '../contexts/DataSourceContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeToggle } from './ThemeToggle';
 
 export type TabType = 'customers' | 'product' | 'sales' | 'stores' | 'employees';
 
@@ -56,9 +58,9 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
         width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
       }}
     >
-      {/* Logo / brand – same dark blue as navbar */}
+      {/* Logo / brand + theme & language – same dark blue as navbar */}
       <div
-        className="flex h-14 items-center border-b border-white/10 px-4 shrink-0"
+        className="flex h-14 items-center justify-between gap-2 border-b border-white/10 px-4 shrink-0"
         style={{ backgroundColor: 'var(--color-nifty-sidebar-header)' }}
       >
         <AnimatePresence mode="wait">
@@ -68,7 +70,7 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center justify-center w-9 h-9 rounded-lg font-semibold text-sm bg-white/15 text-white"
+              className="flex items-center justify-center w-9 h-9 rounded-lg font-semibold text-sm bg-white/15 text-white shrink-0"
             >
               {brand.short}
             </motion.div>
@@ -78,12 +80,16 @@ export function Sidebar({ activeTab, onTabChange, collapsed, onToggleCollapse }:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-semibold text-lg text-white truncate"
+              className="font-semibold text-lg text-white truncate min-w-0"
             >
               {brand.full}
             </motion.div>
           )}
         </AnimatePresence>
+        <div className="flex items-center gap-1 shrink-0">
+          <ThemeToggle />
+          <LanguageSwitcher />
+        </div>
       </div>
 
       {/* Nav – secondary gray-blue background */}

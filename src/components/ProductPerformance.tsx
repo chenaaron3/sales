@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { BreakdownPanel } from './BreakdownPanel';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 
 import type { PerformanceWithStoreBreakdown } from '../types';
 
@@ -11,11 +12,7 @@ interface ProductPerformanceProps {
     viewType: 'product' | 'collection';
 }
 
-const STORE_COLORS = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-    '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8',
-    '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'
-];
+const STORE_COLORS = SEGMENT_COLORS;
 
 export function ProductPerformanceChart({ data, viewType }: ProductPerformanceProps) {
     const { t } = useTranslation();
@@ -23,8 +20,8 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
 
     if (data.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 mb-8">
-                <p className="text-gray-500 dark:text-gray-400">{t('charts.noDataAvailable')}</p>
+            <div className="bg-card rounded-lg shadow-md p-6 border border-border mb-8">
+                <p className="text-muted-foreground">{t('charts.noDataAvailable')}</p>
             </div>
         );
     }
@@ -90,7 +87,7 @@ export function ProductPerformanceChart({ data, viewType }: ProductPerformancePr
                                             y={0}
                                             dy={3}
                                             textAnchor="start"
-                                            fill="#000000"
+                                            fill="var(--color-foreground)"
                                             fontSize={14}
                                             fontWeight="bold"
                                         >

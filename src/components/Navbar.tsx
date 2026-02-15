@@ -11,7 +11,7 @@ export function Navbar() {
   return (
     <header
       className="sticky top-0 z-40 h-14 shrink-0 border-b border-white/10"
-      style={{ backgroundColor: 'var(--color-nifty-nav)' }}
+      style={{ backgroundColor: 'var(--color-nifty-sidebar-header)' }}
     >
       <div className="flex h-full items-center justify-between px-6">
         <h1 className="text-lg font-semibold text-white truncate">

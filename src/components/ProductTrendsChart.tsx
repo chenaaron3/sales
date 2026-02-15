@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 
 import { formatCurrency } from '../utils/i18n';
+import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { ProductTrend, CollectionTrend } from '../types';
 import type { Granularity } from '../utils/dataAnalysis';
 
@@ -14,11 +15,7 @@ interface ProductTrendsChartProps {
     granularity?: Granularity;
 }
 
-const COLORS = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-    '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98d8c8',
-    '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'
-];
+const COLORS = SEGMENT_COLORS;
 
 export function ProductTrendsChart({ productData, collectionData, viewType }: ProductTrendsChartProps) {
     const { t } = useTranslation();

@@ -8,7 +8,6 @@ import type { DataSourceId } from '../utils/precomputedDataLoader';
 import { CustomersTab } from './CustomersTab';
 import { EmployeesTab } from './EmployeesTab';
 import { KPIs } from './KPIs';
-import { Navbar } from './Navbar';
 import { ProductTab } from './ProductTab';
 import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar';
 import { StoresTab } from './StoresTab';
@@ -136,7 +135,6 @@ export function Dashboard() {
                 className="flex flex-col min-h-screen min-w-0 transition-[margin] duration-200"
                 style={{ marginLeft: mainMarginLeft }}
             >
-                <Navbar />
                 <div className="flex-1 p-6 lg:p-8 overflow-auto">
                     <section className="mb-8">
                         <h2 className="text-xl font-semibold text-foreground mb-1">
