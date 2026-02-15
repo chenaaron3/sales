@@ -41,10 +41,10 @@ export function ProductTrendsChart({ productData, collectionData, viewType }: Pr
                                     className="w-3 h-3 rounded-sm"
                                     style={{ backgroundColor: entry.color }}
                                 />
-                                <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                <span className="text-sm text-muted-foreground flex-1">
                                     {entry.name}:
                                 </span>
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                <span className="text-sm font-semibold text-card-foreground">
                                     {formatCurrency(entry.value as number || 0)}
                                 </span>
                             </div>

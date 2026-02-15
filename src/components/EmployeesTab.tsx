@@ -70,17 +70,17 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                     <div className="flex items-center justify-between mb-2">
                         <div>
                             <CardTitle className="text-2xl">{t('employees.title')}</CardTitle>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                                 {t('employees.description')}
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-gray-700 dark:text-gray-300">{t('employees.store')}</label>
+                                <label className="text-sm text-muted-foreground">{t('employees.store')}</label>
                                 <select
                                     value={selectedStore}
                                     onChange={(e) => handleStoreChange(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="px-3 py-2 border border-border rounded-md bg-card text-card-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                 >
                                     <option value="all">{t('employees.allStores')}</option>
                                     {allStores.map((store) => (
@@ -91,11 +91,11 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                                 </select>
                             </div>
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-gray-700 dark:text-gray-300">{t('employees.perPage')}</label>
+                                <label className="text-sm text-muted-foreground">{t('employees.perPage')}</label>
                                 <select
                                     value={itemsPerPage}
                                     onChange={(e) => handleItemsPerPageChange(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="px-3 py-2 border border-border rounded-md bg-card text-card-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                 >
                                     {ITEMS_PER_PAGE_OPTIONS.map((option) => (
                                         <option key={option} value={option}>
@@ -113,7 +113,7 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="text-sm text-muted-foreground">
                                 {t('employees.showing', {
                                     start: ((currentPage - 1) * itemsPerPage) + 1,
                                     end: Math.min(currentPage * itemsPerPage, filteredData.length),
@@ -124,17 +124,17 @@ export function EmployeesTab({ employeePerformance }: EmployeesTabProps) {
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {t('common.previous')}
                                 </button>
-                                <div className="text-sm text-gray-700 dark:text-gray-300">
+                                <div className="text-sm text-muted-foreground">
                                     {t('common.page')} {currentPage} {t('common.of')} {totalPages}
                                 </div>
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {t('common.next')}
                                 </button>
