@@ -60,6 +60,17 @@
       "title": "曜日別売上",
       "revenue": "売上"
     },
+    "days": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    },
+    "weekLabel": "{{year}}年第{{week}}週",
+    "weekLabelShort": "第{{week}}週",
     "birthday": {
       "title": "誕生日と売上の相関",
       "description": "誕生日を基準とした売上活動（負の値 = 誕生日前、正の値 = 誕生日後）",

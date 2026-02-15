@@ -35,8 +35,8 @@ export function CategorySalesChart({ data, selectedCategories }: CategorySalesCh
             <h2 className="text-xl font-bold text-card-foreground mb-4">
                 Sales Volume by Category Over Time
             </h2>
-            <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={400} className="min-h-0">
+                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 100 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                         dataKey="date"
@@ -44,6 +44,7 @@ export function CategorySalesChart({ data, selectedCategories }: CategorySalesCh
                         textAnchor="end"
                         height={80}
                         tick={{ fontSize: 12 }}
+                        interval="preserveStartEnd"
                     />
                     <YAxis />
                     <Tooltip />

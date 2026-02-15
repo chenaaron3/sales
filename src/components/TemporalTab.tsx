@@ -75,7 +75,7 @@ export function TemporalTab({
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="overflow-visible">
                     <TrendChart data={trendData} granularity={granularity} />
                 </CardContent>
             </Card>

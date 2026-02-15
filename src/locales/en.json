@@ -60,6 +60,17 @@
       "title": "Sales by Day of Week",
       "revenue": "Revenue"
     },
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "weekLabel": "{{year}} W{{week}}",
+    "weekLabelShort": "W{{week}}",
     "birthday": {
       "title": "Birthday Sales Correlation",
       "description": "Revenue activity relative to birthdays (negative = before birthday, positive = after)",

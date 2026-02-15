@@ -5,9 +5,9 @@ type Theme = 'light' | 'dark';
 const STORAGE_KEY = 'jouete-theme';
 
 function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-  return stored === 'light' || stored === 'dark' ? stored : 'dark';
+  return stored === 'light' || stored === 'dark' ? stored : 'light';
 }
 
 type ThemeContextValue = { theme: Theme; setTheme: (theme: Theme) => void; toggleTheme: () => void };

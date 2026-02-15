@@ -65,8 +65,8 @@ export function StoreTrendsChart({ data }: StoreTrendsChartProps) {
     const storeNames = Object.keys(data[0]).filter(key => key !== 'date');
 
     return (
-        <ResponsiveContainer width="100%" height={500}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <ResponsiveContainer width="100%" height={500} className="min-h-0">
+            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 100 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                     dataKey="date"
@@ -74,6 +74,7 @@ export function StoreTrendsChart({ data }: StoreTrendsChartProps) {
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    interval="preserveStartEnd"
                 />
                 <YAxis
                     tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`}

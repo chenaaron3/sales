@@ -6,6 +6,32 @@ import { SEGMENT_COLORS } from '../utils/chartColors';
 import type { Granularity } from '../utils/dataAnalysis';
 import type { TimeSeriesData } from '../types';
 
+/** Format x-axis date label for current locale (week/month/day in Japanese when lang is ja). */
+function formatXAxisDateLabel(label: string, granularity: Granularity, language: string): string {
+    if (granularity === 'weekly' && /^(\d{4})-W(\d+)$/.test(label)) {
+        const [, year, week] = label.match(/^(\d{4})-W(\d+)$/)!;
+        if (language === 'ja') {
+            return `${year}年第${parseInt(week, 10)}週`;
+        }
+        return `W${parseInt(week, 10)}`;
+    }
+    if (granularity === 'monthly' && /^(\d{4})-(\d{2})$/.test(label)) {
+        const [, year, month] = label.match(/^(\d{4})-(\d{2})$/)!;
+        if (language === 'ja') {
+            return `${year}年${parseInt(month, 10)}月`;
+        }
+        return `${year}-${month}`;
+    }
+    if (granularity === 'daily' && /^\d{4}-\d{2}-\d{2}$/.test(label)) {
+        const [y, m, d] = label.split('-').map(Number);
+        if (language === 'ja') {
+            return `${m}/${d}`;
+        }
+        return `${m}/${d}`;
+    }
+    return label;
+}
+
 interface TrendChartProps {
     data: TimeSeriesData[];
     granularity: Granularity;
@@ -42,10 +68,11 @@ const getWeekDateRange = (weekLabel: string): { weekLabel: string; dateRange: st
 };
 
 export function TrendChart({ data, granularity }: TrendChartProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Custom tooltip component
-    const CustomTooltip = ({ active, payload, label, data, granularity }: any) => {
+    const CustomTooltip = ({ active, payload, label, data, granularity, i18n: i18nTooltip }: any) => {
+        const lang = i18nTooltip?.language ?? i18n.language;
         if (active && payload && payload.length) {
             const revenue = payload[0].value as number;
 
@@ -57,12 +84,11 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
                 ? 100
                 : Math.round(((revenue - minRevenue) / (maxRevenue - minRevenue)) * 100);
 
-            // Format label - add week date range for weekly granularity
-            let displayLabel = label;
+            // Format label for locale; add week date range for weekly granularity
+            let displayLabel = formatXAxisDateLabel(label, granularity, lang);
             let dateRange = '';
             if (granularity === 'weekly' && label.match(/^\d{4}-W\d+$/)) {
                 const weekInfo = getWeekDateRange(label);
-                displayLabel = weekInfo.weekLabel;
                 dateRange = weekInfo.dateRange;
             }
 
@@ -85,8 +111,8 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
     };
 
     return (
-        <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <ResponsiveContainer width="100%" height={400} className="min-h-0">
+            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 100 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                     dataKey="date"
@@ -94,9 +120,11 @@ export function TrendChart({ data, granularity }: TrendChartProps) {
                     textAnchor="end"
                     height={80}
                     tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => formatXAxisDateLabel(value, granularity, i18n.language)}
+                    interval="preserveStartEnd"
                 />
                 <YAxis tickFormatter={(value) => `¥${(value / 1000).toFixed(0)}k`} />
-                <Tooltip content={(props) => <CustomTooltip {...props} data={data} granularity={granularity} t={t} />} />
+                <Tooltip content={(props) => <CustomTooltip {...props} data={data} granularity={granularity} t={t} i18n={i18n} />} />
                 <Bar dataKey="revenue" fill={SEGMENT_COLORS[0]} name={t('charts.revenue')} />
             </BarChart>
         </ResponsiveContainer>

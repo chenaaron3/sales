@@ -69,8 +69,8 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
     const colors = SEGMENT_COLORS;
 
     return (
-        <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <ResponsiveContainer width="100%" height={400} className="min-h-0">
+            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 100 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                     dataKey="date"
@@ -78,6 +78,7 @@ export function AttributeTrendsChart({ data }: AttributeTrendsProps) {
                     textAnchor="end"
                     height={80}
                     tick={{ fontSize: 12 }}
+                    interval="preserveStartEnd"
                 />
                 <YAxis />
                 <Tooltip content={<CustomTooltip />} />
