@@ -1,57 +1,71 @@
 @import "tailwindcss";
 
-/* Nifty-style palette (per Nifty docs: https://www.mq9.jp/webtech/nifty-v2.9.1/documentation/) */
+/* Template palette: dark blue navbar, gray-blue sidebar, white content, teal CTA */
 @theme {
-  /* Light theme - Nifty default */
-  --color-background: #f5f7fa;
+  /* Light theme – very light gray content area, white cards, light borders */
+  --color-background: #f8f8f8;
   --color-foreground: #4a5568;
   --color-card: #ffffff;
   --color-card-foreground: #4a5568;
   --color-popover: #ffffff;
   --color-popover-foreground: #4a5568;
-  --color-primary: #2c3b52;
+  --color-primary: #2C3B53;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #e2e8f0;
+  --color-secondary: #f0f0f0;
   --color-secondary-foreground: #4a5568;
-  --color-muted: #f5f7fa;
+  --color-muted: #f8f8f8;
   --color-muted-foreground: #718096;
-  --color-accent: #e2e8f0;
+  --color-accent: #e8e8e8;
   --color-accent-foreground: #4a5568;
   --color-destructive: #e74c3c;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #2c3b52;
-  --radius: 0.375rem;
-  /* Nifty navbar/sidebar (shared) */
-  --color-nifty-nav: #2c3b52;
-  --color-nifty-sidebar-bg: #f5f7fa;
-  --color-nifty-pink: #ff6699;
+  --color-border: #e0e0e0;
+  --color-input: #e0e0e0;
+  --color-ring: #2C3B53;
+  --radius: 0.5rem;
+  /* Navbar: primary dark blue */
+  --color-nifty-nav: #2C3B53;
+  /* Sidebar: header same as nav, body = gray-blue, active = darker blue */
+  --color-nifty-sidebar-header: #2C3B53;
+  --color-nifty-sidebar-bg: #384C66;
+  --color-nifty-sidebar-active: #2F405E;
+  /* CTA / primary action (e.g. "Change conditions") */
+  --color-nifty-teal: #2ECC71;
+  --color-nifty-teal-foreground: #ffffff;
+  /* RFM matrix scale: high (teal) → low (destructive), blends with theme */
+  --rfm-high: #2ECC71;
+  --rfm-low: #e74c3c;
 }
 
 /* Dark theme overrides when .dark on html */
 .dark {
-  --color-background: oklch(15% 0.01 250);
+  --color-background: oklch(12% 0.01 250);
   --color-foreground: oklch(98% 0 0);
-  --color-card: oklch(22% 0.01 250);
+  --color-card: oklch(18% 0.01 250);
   --color-card-foreground: oklch(98% 0 0);
-  --color-popover: oklch(20% 0.01 250);
+  --color-popover: oklch(18% 0.01 250);
   --color-popover-foreground: oklch(98% 0 0);
   --color-primary: oklch(98% 0 0);
-  --color-primary-foreground: oklch(25% 0.01 250);
-  --color-secondary: oklch(18% 0.01 250);
+  --color-primary-foreground: oklch(20% 0.01 250);
+  --color-secondary: oklch(22% 0.01 250);
   --color-secondary-foreground: oklch(98% 0 0);
-  --color-muted: oklch(18% 0.01 250);
-  --color-muted-foreground: oklch(65% 0.01 250);
-  --color-accent: oklch(18% 0.01 250);
+  --color-muted: oklch(20% 0.01 250);
+  --color-muted-foreground: oklch(70% 0 0);
+  --color-accent: oklch(22% 0.01 250);
   --color-accent-foreground: oklch(98% 0 0);
-  --color-destructive: oklch(30% 0.2 25);
+  --color-destructive: oklch(45% 0.2 25);
   --color-destructive-foreground: oklch(98% 0 0);
-  --color-border: oklch(18% 0.01 250);
-  --color-input: oklch(18% 0.01 250);
-  --color-ring: oklch(84% 0.01 250);
-  --color-nifty-nav: #1e293b;
-  --color-nifty-sidebar-bg: oklch(18% 0.01 250);
+  --color-border: oklch(25% 0.01 250);
+  --color-input: oklch(22% 0.01 250);
+  --color-ring: oklch(80% 0 0);
+  --color-nifty-nav: #1e2a38;
+  --color-nifty-sidebar-header: #1e2a38;
+  --color-nifty-sidebar-bg: #243447;
+  --color-nifty-sidebar-active: #2c3e50;
+  --color-nifty-teal: #27ae60;
+  --color-nifty-teal-foreground: #ffffff;
+  --rfm-high: #27ae60;
+  --rfm-low: oklch(45% 0.2 25);
 }
 
 @layer base {
@@ -102,3 +116,31 @@ button:focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
 }
+
+/* RFM matrix: scale from theme teal (high) to destructive (low) */
+.rfm-legend-bar {
+  background: linear-gradient(to right, var(--rfm-high), #5dd68a, #8ee0a8, #b8e8c4, #d4eedc, #e8d4d4, #e0a8a8, #d67878, var(--rfm-low));
+}
+.rfm-cell-0 { background-color: var(--color-muted); }
+.rfm-cell-1 { background-color: var(--rfm-low); }
+.rfm-cell-2 { background-color: #d67878; }
+.rfm-cell-3 { background-color: #e0a8a8; }
+.rfm-cell-4 { background-color: #e8d4d4; }
+.rfm-cell-5 { background-color: #d4eedc; }
+.rfm-cell-6 { background-color: #b8e8c4; }
+.rfm-cell-7 { background-color: #8ee0a8; }
+.rfm-cell-8 { background-color: #5dd68a; }
+.rfm-cell-9 { background-color: var(--rfm-high); }
+.dark .rfm-legend-bar {
+  background: linear-gradient(to right, var(--rfm-high), oklch(50% 0.12 160), oklch(42% 0.06 160), oklch(35% 0.04 250), oklch(32% 0.04 250), oklch(38% 0.06 25), oklch(42% 0.1 25), oklch(48% 0.15 25), var(--rfm-low));
+}
+.dark .rfm-cell-0 { background-color: var(--color-muted); }
+.dark .rfm-cell-1 { background-color: var(--rfm-low); }
+.dark .rfm-cell-2 { background-color: oklch(50% 0.15 25); }
+.dark .rfm-cell-3 { background-color: oklch(45% 0.12 25); }
+.dark .rfm-cell-4 { background-color: oklch(35% 0.04 250); }
+.dark .rfm-cell-5 { background-color: oklch(32% 0.04 160); }
+.dark .rfm-cell-6 { background-color: oklch(38% 0.08 160); }
+.dark .rfm-cell-7 { background-color: oklch(45% 0.1 160); }
+.dark .rfm-cell-8 { background-color: oklch(50% 0.12 160); }
+.dark .rfm-cell-9 { background-color: var(--rfm-high); }

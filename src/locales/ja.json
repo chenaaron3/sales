@@ -27,6 +27,7 @@
   },
   "header": {
     "title": "Jouete分析",
+    "titleMark": "Dashboard",
     "tabs": {
       "sales": "売上",
       "customers": "顧客",

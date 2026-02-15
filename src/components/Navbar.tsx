@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
+import { useDataSource } from '../contexts/DataSourceContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeToggle } from './ThemeToggle';
 
 export function Navbar() {
   const { t } = useTranslation();
+  const dataSource = useDataSource();
+  const titleKey = dataSource === 'mark' ? 'header.titleMark' : 'header.title';
 
   return (
     <header
@@ -12,7 +15,7 @@ export function Navbar() {
     >
       <div className="flex h-full items-center justify-between px-6">
         <h1 className="text-lg font-semibold text-white truncate">
-          {t('header.title')}
+          {t(titleKey)}
         </h1>
         <div className="flex items-center gap-1">
           <ThemeToggle />

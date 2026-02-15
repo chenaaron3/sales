@@ -31,12 +31,12 @@ export function KPICard({ title, value, format = 'number', trend }: KPICardProps
                 </CardTitle>
             </CardHeader>
             <CardContent className="py-5 pt-0">
-                <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline justify-center gap-3">
                     <p className="text-2xl font-bold text-card-foreground">
                         {formatValue(value)}
                     </p>
                     {trend !== undefined && (
-                        <span className={`text-sm font-medium ${trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        <span className={`text-sm font-medium shrink-0 ${trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             {trend >= 0 ? '↑' : '↓'} {Math.abs(trend).toFixed(1)}%
                         </span>
                     )}

@@ -10,7 +10,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 
         const variants = {
-            default: "bg-[var(--color-nifty-nav)] text-white hover:opacity-90 focus-visible:ring-[var(--color-nifty-nav)] dark:focus-visible:ring-gray-300",
+            default: "bg-[var(--color-nifty-teal)] text-[var(--color-nifty-teal-foreground)] hover:opacity-90 focus-visible:ring-[var(--color-nifty-teal)] dark:focus-visible:ring-gray-300",
             outline: "border border-border bg-card hover:bg-muted focus-visible:ring-ring",
             ghost: "hover:bg-muted focus-visible:ring-ring"
         }

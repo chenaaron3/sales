@@ -40,6 +40,17 @@ export interface MemberRecord {
   firstRegisteredStore: string | null;
 }
 
+/** Optional store–customer rank data (e.g. per-brand); not all data sources provide this. */
+export interface StoreCustomerRankRecord {
+  id: string;
+  memberId: string;
+  storeId: string;
+  storeName: string;
+  staffCode: string;
+  staffName: string;
+  customerRank: string | null;
+}
+
 export interface KPIMetrics {
   totalRevenue: number;
   totalTransactions: number;
